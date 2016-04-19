@@ -93,12 +93,14 @@ func isCatName(catName: String?) -> String {
 }
 
 isCatName(nil)
+isCatName("Tashi")
 
 /*:
  ##### _Do:_
  Rewrite `isCatName(_:)` using the nil coalescing operator
  */
-
+var catName: String?
+let result10 = catName ?? "Cat name was nil"
 
 /*:
  ##### _Do:_
@@ -108,7 +110,20 @@ isCatName(nil)
  - Use guard to optionally bind the incoming parameter
  - Create a second version that using nil coalescing
  */
+func f2(num: Int?) -> Int {
+    guard let num = num else {
+        return -1
+    }
+    return num * num
+}
 
+func f3(num:Int?) -> Int {
+//    let result =
+    return (num ?? -1) != -1 ? (num! * num!) : -1
+}
+
+f2(nil)
+f3(12)
 /*: -------------------- */
 /*:
  ##### **Optional Casting**
@@ -128,8 +143,9 @@ myCell.textLabel?.text = "My label"
 vanillaCell = myCell
 print(vanillaCell?.textLabel?.text)
 
-
-class Mammal {}
+class Animate {
+}
+class Mammal:Animate {}
 
 class Person: Mammal {
     var name: String?
@@ -160,7 +176,10 @@ p3 //: Dog?
  - Write a new let _p4_ that does an optional cast of the person object to an Animate
  - Write an _if let_ that prints out a message showing that a person is indeed an Animate object
  */
-
+let p4 = person as? Animate
+if let p4 = p4 {
+    print("Person is indeed an Animate Object")
+}
 /*: -------------------- */
 /*:
  #### **Optional Chaining**
@@ -211,9 +230,29 @@ if citizen2 != nil {
     result9 = nil
 }
 
+print(result9)
+
 
 /*:
  ##### _Do:_
  - vanillaCell?.textLabel?.text above is optional chaining.
  - Write this statement out long hand using != nil for each element and print the unwrapped text value
  */
+var text: String?
+if vanillaCell != nil {
+    if vanillaCell!.textLabel != nil {
+        if vanillaCell!.textLabel!.text != nil {
+            text = vanillaCell!.textLabel!.text
+        } else {
+            text = nil
+        }
+    } else {
+        text = nil
+    }
+} else {
+    text = nil
+}
+
+
+
+

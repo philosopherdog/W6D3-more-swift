@@ -50,5 +50,21 @@ todoItem.append(todo2)
  - Create an empty array that holds LibraryCards
  - Write a forin loop that creates 20 cards and adds them to the array
  */
+class LibraryCard {
+    var number = 11223 {
+        didSet {
+            print("didSet newValue \(oldValue), the new value is \(number)")
+        }
+        willSet {
+            print("willSet oldValue \(newValue) and the old value is \(number)")
+        }
+    }
+}
 
+var lib: [LibraryCard] = []
+
+for i in 1...20 {
+    let lib = LibraryCard()
+    lib.number = Int(arc4random_uniform(1000+1))
+}
 //: [Next](@next)

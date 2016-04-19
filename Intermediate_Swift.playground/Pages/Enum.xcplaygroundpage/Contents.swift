@@ -40,7 +40,7 @@ class MyViewController:UIViewController {
         case MasterViewController
         case DetailViewController
     }
-    override func prepareForSegue(segue: UIStoryboardSegue, sender sender: AnyObject?) {
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier! == SegueIdentifier.MasterViewController.rawValue {
         }
     }
@@ -102,5 +102,25 @@ case .F:
  - the PercentComplete should have 3 separate cases for 1-50, 51-75, 76-99 
  - bind the percent to a constant and write a where clause for each case and print something according to the percent complete
  */
+enum Progress {
+    case Unstarted
+    case PercentComplete(percent: Int)
+    case Complete
+}
+
+let percentComplete = Progress.PercentComplete(percent:90)
+switch percentComplete {
+case .PercentComplete (let percent) where 1...50 ~= percent:
+    print("keep going")
+case .PercentComplete (let percent) where 51...75 ~= percent:
+    print("Almost there")
+case .PercentComplete (let percent) where 76...99 ~= percent:
+    print("Good as done")
+default:
+    print("default")
+}
+
+
+
 
 //: [Next](@next)

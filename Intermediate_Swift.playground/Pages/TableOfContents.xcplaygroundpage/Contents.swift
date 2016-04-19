@@ -9,9 +9,8 @@ import UIKit
  
  - I'm experimenting using playgrounds
  - _Do:_ sections will allow us to practice as we go
- - Most of the _Do:'s_ are pretty basic
+ - Most of the _Do:'s_ are pretty basic, but don't worry if you can't get them. You can always practice after
  - To get the most out of them PLEASE AVOID COPY/PASTE
- - Actually, _always_ avoid COPY/PASTE.
  - I've found _Manual Run_ least problematic for working with playgrounds
  - I recommend that you bind a hot key to _Execute Playground_
  */

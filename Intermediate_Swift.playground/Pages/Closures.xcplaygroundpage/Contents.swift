@@ -1,6 +1,6 @@
 //: [Previous](@previous)
 
-import Foundation
+import UIKit
 
 /*:
  ### **Named Closures (AKA Functions)**
@@ -44,7 +44,7 @@ funkyFunc2(myFunc)
  - Plain functions can be passed to another object to be used as a callback or completion handler
  - Apple uses this in all modern parts of the SDK (blocks weren't added to objc until 2007 I think)
  */
-class MasterViewController {
+class MasterViewController:UIViewController {
     var detailViewController: DetailViewController?
     
     func completionHandler(data:String) {
@@ -57,13 +57,13 @@ class MasterViewController {
     }
 }
 
-class DetailViewController {
+class DetailViewController: UIViewController {
     typealias callBack = (data:String)->(Void)
     var completionHandler:callBack!
     
     func fakeButtonTap() {
         // do some long running task
-        sleep(2)
+        // sleep(2)
         // get some user input
         let fakeUserData = "Pick up milk"
         completionHandler(data:fakeUserData)
@@ -137,7 +137,10 @@ let result = multiply(12, 10)
  - These closures should probably take no inputs but just print out a message (it's up to you)
  - Write a forin loop and call each closure
  */
-
+let closureArray:[()->()] = [{print("hello")}, {print("Light")}, {print("House")}]
+for item in closureArray {
+    item()
+}
 /*:
  #### Why Closures?
  - If functions just are named closures, then why do we need closures at all?
@@ -189,7 +192,7 @@ foods.sort({ $0 < $1 })
  Swift's String type actually defines the `>` and `<` as a function that takes 2 strings and returns a Bool depending on their order. So we can even omit the generated shorthand arguments!
  */
 
-foods.sort(<)
+foods.sort(>)
 
 /*:
  ###### _Trailing Closure Syntax_
@@ -259,10 +262,25 @@ myInnerFunc()
  Rewrite the last function using a closure:
  */
 /*
-func outerFunc3()->(()->Int) {
-    
-}
+ var num = 10
+ func innerFunc()-> Int {
+ num += 20
+ return num
+ }
+ return innerFunc
  */
+func outerFunc3()->(()->Int) {
+    var num = 10
+    return {
+        num += 20
+        return num
+    }
+}
+
+let f6 = outerFunc3()
+f6()
+
+ 
 
 /*:
  ###### _Capture List_:
@@ -302,7 +320,7 @@ let result2 = arr1.map({ (num:Int) -> String in
  ##### _Do:_
  Simplify map using some of the techniques we talked about earlier:
  */
-
+let result3 = arr1.map{"\($0)"}
 /*:
  ##### `reduce()`
  Similar to the `map()` but it reduces all of the elements to a single value
@@ -333,8 +351,8 @@ for item in arr1 {
 result4
 
 // filter way
-let result3 = arr1.filter{ $0%3 == 0 }
-result3
+let result8 = arr1.filter{ $0%3 == 0 }
+result8
 
 /*:
  ##### _Do:_
@@ -360,7 +378,8 @@ dataArray
  ##### _Do:_
  - Using `map()` get an array of firstName lastName as a single string
  */
-
+let arrayOfStrings: [String] = dataArray.map{ $0.firstName + " " + $0.lastName }
+arrayOfStrings
 
 
 /*:
@@ -368,19 +387,22 @@ dataArray
  - You can chain these functions together.
  - Add sort so that it lists the names in ascending order:
  */
-
+let arrayOfStrings2: [String] = dataArray.map{ $0.firstName + " " + $0.lastName }.sort(<)
+arrayOfStrings2
 
 /*:
  ##### _Do:_
  - Using `reduce()` get the average age
  */
-
+let result12 = dataArray.reduce(0){ $0 + $1.age }/dataArray.count
+result12
 
 /*:
  ##### _Do:_
  - Using `filter()` get only those people whose name is "Jim"
  */
-
+let result13 = dataArray.filter{ $0.firstName == "Jim" }
+result13
 
 
 
