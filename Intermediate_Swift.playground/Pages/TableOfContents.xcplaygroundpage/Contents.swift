@@ -20,6 +20,8 @@ import UIKit
  
  [Optionals](Optionals)
  
+ [Enums](Enum)
+ 
  [Tuples](Tuples)
  
  [Property Observers](PropertyObservers)

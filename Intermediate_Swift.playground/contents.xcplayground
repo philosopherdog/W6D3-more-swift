@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<playground version='6.0' target-platform='ios' display-mode='raw' executeOnSourceChanges='false'>
+<playground version='6.0' target-platform='ios' display-mode='rendered' executeOnSourceChanges='false'>
     <pages>
         <page name='TableOfContents'/>
         <page name='Optionals'/>
+        <page name='Enum'/>
         <page name='Tuples'/>
         <page name='PropertyObservers'/>
         <page name='Closures'/>
