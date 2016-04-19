@@ -21,7 +21,10 @@ print(result6)
 /*: -------------------- */
 /*:
  ##### **Forced UnWrap**
- - If a value must be there doing a forced unwrap will crash your app. Helpful in development, but you might want to remove in production
+ - Everyone knows about forced unwrap
+ - Use it when you absolutely expect a value there and the app cannot continue without it
+ - Helpful in development, but you might want to deal with missing data more gracefully in a production app
+ - Avoid using forced unwrap just because you don't understand what's happening
  */
 
 var valueMustBeThere: Int? = 12
@@ -39,8 +42,19 @@ valueMustBeThere!
 
 var name: String?
 
+//: Replaces 2 options
+//: 1. Long way
+var result8 = ""
+if let name = name {
+    result8 = name
+} else {
+    name = "Slow Freddy"
+}
+
+//: 2. Long way using ternary
 let result1 = name != nil ? name! : "Fast Freddy"
 
+//: Nil coalescing (Sweet)
 let result7 = name ?? "Slow Freddy"
 
 /*:
@@ -53,6 +67,12 @@ result3
 
 let result4 = age ?? 40
 result4
+
+/*:
+ ###### _Do:_
+ Rewrite long way 1. using guard.
+ */
+
 /*: -------------------- */
 
 /*:
@@ -76,19 +96,26 @@ isCatName(nil)
 
 /*:
  ##### _Do:_
+ Rewrite `isCatName(_:)` using the nil coalescing operator
+ */
+
+
+/*:
+ ##### _Do:_
  - Create a function that takes an optional Int parameter, and returns an Int
  - If the argument passed in is nil then return -1
  - If the argument passed in is not nil then square it
  - Use guard to optionally bind the incoming parameter
+ - Create a second version that using nil coalescing
  */
 
 /*: -------------------- */
 /*:
  ##### **Optional Casting**
+ Notice: Upcasting is _implicit_!
  */
 
-/*: Notice: Upcasting is implicit! */
-
+//: Example of implicit upcasting
 var vanillaCell: UITableViewCell?
 
 class MyCell: UITableViewCell {
@@ -97,6 +124,7 @@ class MyCell: UITableViewCell {
 let myCell = MyCell()
 myCell.textLabel?.text = "My label"
 
+//: I'm upcasting here (Look ma no _as_)
 vanillaCell = myCell
 print(vanillaCell?.textLabel?.text)
 
@@ -109,26 +137,26 @@ class Person: Mammal {
 
 class Dog: Mammal {}
 
-// Notice person is an AnyObject!
+//: Notice person is being implicitly upcast to an AnyObject!
 let person: AnyObject = Person()
 if person is Mammal {
     print("Person is a mammal")
 }
 
-// because Person is an AnyObject the compiler cannot infer its underlying type so we can't use as
-// you have to force the cast
+//: because Person is an AnyObject the compiler cannot infer its underlying type so we can't use _as_ since this could return nil i.e. fail
+//: you have to force the cast
 let p2 = person as! Mammal
 
-// if you think the cast could fail use as? instead
+//: if you think the cast could fail use as? instead, which returns an optional
 
 let p3 = person as? Dog
 
-p3
+p3 //: Dog?
 
 /*:
  ##### _Do:_
  - Create another class Animate
- - Add Animate to the Mammal class as its subclass
+ - Make Mammal a subclass of Animate
  - Write a new let _p4_ that does an optional cast of the person object to an Animate
  - Write an _if let_ that prints out a message showing that a person is indeed an Animate object
  */
@@ -140,11 +168,13 @@ p3
 
 
 class Citizen {
+    // not every citize has a libraryCard
     var libraryCard: LibraryCard?
 }
 
 class LibraryCard {
     let number: Int?
+    // some library cards have no number? use your imagination.
     init(number:Int?) {
         self.number = number
     }
@@ -158,39 +188,32 @@ libraryCardNot // nil
 
 let libraryCard = LibraryCard(number: 12)
 
-let citizen2 = Citizen()
-citizen2.libraryCard = libraryCard
-let number = citizen2.libraryCard?.number
+let citizen2:Citizen? = Citizen()
+citizen2?.libraryCard = libraryCard
+let number = citizen2?.libraryCard?.number
 print(number) // returns an optional if successful, otherwise nil
 
+//: Why do we need optional chaining!?
+//: citizen2.libraryCard?.number replaces the following mess!
 
-// citizen2.libraryCard?.number replaces the following nested mess!
-
-if citizen2.libraryCard != nil {
-    let card = citizen2.libraryCard!
-    if card.number != nil {
-        let num = card.number!
-        print("Yay I finally got the number!")
+var result9: Int?
+if citizen2 != nil {
+    if citizen2!.libraryCard != nil {
+        if citizen2?.libraryCard!.number != nil {
+            result9 = citizen2!.libraryCard!.number!
+        } else {
+            result9 = nil
+        }
+    } else {
+        result9 = nil
     }
+} else {
+    result9 = nil
 }
 
 
 /*:
  ##### _Do:_
- - vanillaCell?.textLabel?.text above is optional chaining. 
+ - vanillaCell?.textLabel?.text above is optional chaining.
  - Write this statement out long hand using != nil for each element and print the unwrapped text value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ */

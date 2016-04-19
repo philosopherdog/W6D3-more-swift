@@ -264,6 +264,21 @@ func outerFunc3()->(()->Int) {
 }
  */
 
+/*:
+ ###### _Capture List_:
+ - Notice that nested functions & closures capture value by reference.
+ - This means that the values capture can be mutated, which might not be what you want (objc blocks capture by value BTW)
+ - Swift uses something called a _capture list_ to capture by value
+ */
+
+var y = 10
+
+let close4 = {[y] in print("==>", y)
+}
+y = 12
+
+close4() // prints 10, 12 without the capture list
+
 
 /*:
  ##### **Higher Order Functions**
