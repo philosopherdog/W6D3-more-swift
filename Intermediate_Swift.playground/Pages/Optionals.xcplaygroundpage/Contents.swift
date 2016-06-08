@@ -16,19 +16,40 @@ import UIKit
  ##### **Basic Example:** */
 var numString = "45"
 
-let result6 = Int(numString) // Convert to Int?
+let result6 = Int(numString) // Int() Converts a String to Int?
 print(result6)
+
+/*:
+ ##### _Do:_
+ - write a conditional binding statement to unwrap result6
+ */
+
+
 /*: -------------------- */
 /*:
  ##### **Forced UnWrap**
  - Everyone knows about forced unwrap
  - Use it when you absolutely expect a value there and the app cannot continue without it
- - Helpful in development, but you might want to deal with missing data more gracefully in a production app
+ - Helpful in development because you want your app to crash in development if something unexpected is happening
+ - But you might want to deal with missing data more gracefully in a production app
  - Avoid using forced unwrap just because you don't understand what's happening
  */
 
 var valueMustBeThere: Int? = 12
 valueMustBeThere!
+
+/*:
+ ##### _Do:_
+ - rewrite the forced unwrap (above) in 3 distinct ways using a) a nil check, b) optional binding and c) guard. (Tip: comment out the forced unwrap version)
+ */
+
+// a) nil check
+
+// b) optional binding
+
+// c) guard
+
+
 
 /*: -------------------- */
 /*:
@@ -42,53 +63,58 @@ valueMustBeThere!
 
 var name: String?
 
-//: Replaces 2 options
+//: Nil Coalescing Replaces 2 more verbose techniques
 //: 1. Long way
 var result8 = ""
 if let name = name {
+    // name is unwrapped
     result8 = name
 } else {
-    name = "Slow Freddy"
+    // default value if name is nil
+    result8 = "Slow Freddy"
 }
+result8
 
-//: 2. Long way using ternary
-let result1 = name != nil ? name! : "Fast Freddy"
-
+//: 2. Long way using basic ternary operator & nil checking
+let result1 = name != nil ? name! : "Fat Freddy"
 //: Nil coalescing (Sweet)
-let result7 = name ?? "Slow Freddy"
-
+let result7 = name ?? "Slim Freddy"
 /*:
  ###### _Example 2:_
  */
-var age: Int?
+var age: Int? = 20
 
+// ternary version
 let result3 = age != nil ? age : 30
-result3
-
+//: - Notice nil coalescing does implicit nil checking (try removing != nil from the ternary operator).
+//: - Nil coalsecing implicitly uses the unwrapped optional if not nil.
+// nil coalescing version
 let result4 = age ?? 40
-result4
 
 /*:
  ###### _Do:_
- Rewrite long way 1. using guard.
+ Rewrite the long way using _guard_.
  */
 
 /*: -------------------- */
-
 /*:
  ##### **Optional Binding With Guard**
  
  - Prefer _guard let/var_ over _if let/var_
- - Guard is more intuitive since you test for what you want, not what you don't want
- - Guard gives an early exit
+ - Guard is more intuitive since you test for _what you want_, not what you don't want
+ - Guard gives an _early exit_
  - Guard puts the _Golden Path_ of your code outside brackets
+ - Guard helps avoid the _pyramid of doom_
+ - Guard makes code easier to reason about
  
  ##### _Example:_
  */
 func isCatName(catName: String?) -> String {
-    guard let catName = catName else {
+    // nb. I'm making catName mutable, but remember it's a copy
+    guard var catName = catName else {
         return "Cat name was nil!"
     }
+    catName += " meow"
     return catName
 }
 
@@ -96,34 +122,10 @@ isCatName(nil)
 isCatName("Tashi")
 
 /*:
- ##### _Do:_
- Rewrite `isCatName(_:)` using the nil coalescing operator
+ ##### _Do On Your Own:_
+ Rewrite `isCatName(_:)` as `isCatName2(_:)` using the nil coalescing operator instead of guard
  */
-var catName: String?
-let result10 = catName ?? "Cat name was nil"
 
-/*:
- ##### _Do:_
- - Create a function that takes an optional Int parameter, and returns an Int
- - If the argument passed in is nil then return -1
- - If the argument passed in is not nil then square it
- - Use guard to optionally bind the incoming parameter
- - Create a second version that using nil coalescing
- */
-func f2(num: Int?) -> Int {
-    guard let num = num else {
-        return -1
-    }
-    return num * num
-}
-
-func f3(num:Int?) -> Int {
-//    let result =
-    return (num ?? -1) != -1 ? (num! * num!) : -1
-}
-
-f2(nil)
-f3(12)
 /*: -------------------- */
 /*:
  ##### **Optional Casting**
@@ -138,14 +140,15 @@ class MyCell: UITableViewCell {
 
 let myCell = MyCell()
 myCell.textLabel?.text = "My label"
+myCell
 
 //: I'm upcasting here (Look ma no _as_)
+// Notice I don't need to:
+// vanillaCell = myCell as? UITableViewCell
 vanillaCell = myCell
-print(vanillaCell?.textLabel?.text)
+print((vanillaCell?.textLabel?.text)!)
 
-class Animate {
-}
-class Mammal:Animate {}
+class Mammal {}
 
 class Person: Mammal {
     var name: String?
@@ -153,37 +156,41 @@ class Person: Mammal {
 
 class Dog: Mammal {}
 
-//: Notice person is being implicitly upcast to an AnyObject!
+//: Notice person is being implicitly upcast to an AnyObject! when I initialize it
 let person: AnyObject = Person()
 if person is Mammal {
     print("Person is a mammal")
 }
 
 //: because Person is an AnyObject the compiler cannot infer its underlying type so we can't use _as_ since this could return nil i.e. fail
-//: you have to force the cast
+//: you should force the cast, since we know person is a Mammal
 let p2 = person as! Mammal
 
-//: if you think the cast could fail use as? instead, which returns an optional
+//: if you think the cast _could_ fail use as? instead, which returns an optional
 
-let p3 = person as? Dog
+let p3 = person as? Dog // if we forced downcast this would crash
 
-p3 //: Dog?
+p3 //: p3 is _not_ of type Dog
 
 /*:
- ##### _Do:_
+ ##### _Do On Your Own:_
  - Create another class Animate
  - Make Mammal a subclass of Animate
  - Write a new let _p4_ that does an optional cast of the person object to an Animate
  - Write an _if let_ that prints out a message showing that a person is indeed an Animate object
  */
-let p4 = person as? Animate
-if let p4 = p4 {
-    print("Person is indeed an Animate Object")
-}
+
+
+
 /*: -------------------- */
 /*:
  #### **Optional Chaining**
+ - Is Shorthand for unwrapping optionals.
+ - It overloads the `?`, which makes it a bit confusing.
+ - It allows a nested expression to fail anywhere along the unwrapping
+ - The whole expression either returns nil or an optional
  */
+
 
 
 class Citizen {
@@ -193,7 +200,7 @@ class Citizen {
 
 class LibraryCard {
     let number: Int?
-    // some library cards have no number? use your imagination.
+    // some library cards have no number? (use your imagination!)
     init(number:Int?) {
         self.number = number
     }
@@ -210,7 +217,7 @@ let libraryCard = LibraryCard(number: 12)
 let citizen2:Citizen? = Citizen()
 citizen2?.libraryCard = libraryCard
 let number = citizen2?.libraryCard?.number
-print(number) // returns an optional if successful, otherwise nil
+print(number) // NOTICE returns an OPTIONAL if successful, otherwise nil, but each of the elements is unwrapped if it contains a value expect the final one
 
 //: Why do we need optional chaining!?
 //: citizen2.libraryCard?.number replaces the following mess!
@@ -218,11 +225,8 @@ print(number) // returns an optional if successful, otherwise nil
 var result9: Int?
 if citizen2 != nil {
     if citizen2!.libraryCard != nil {
-        if citizen2?.libraryCard!.number != nil {
-            result9 = citizen2!.libraryCard!.number!
-        } else {
-            result9 = nil
-        }
+        result9 = citizen2!.libraryCard!.number
+        print(result9)
     } else {
         result9 = nil
     }
@@ -232,26 +236,40 @@ if citizen2 != nil {
 
 print(result9)
 
+// same thing with guard
+/*
+guard let citizen2 = citizen2 else {
+    fatalError()
+}
+
+guard let libraryCard = citizen2.libraryCard else {
+    fatalError()
+}
+ libraryCard.number
+*/
+
+
+// here it is using optional binding.
+
+if let citizen2 = citizen2 {
+    if let libraryCard = citizen2.libraryCard {
+    print(libraryCard.number)
+    }
+}
+
+// I can also drop the nesting and do it inline
+if let citizen2 = citizen2, libraryCard = citizen2.libraryCard {
+    print(libraryCard.number)
+}
+
 
 /*:
- ##### _Do:_
+ ##### _Do On Your Own:_
  - vanillaCell?.textLabel?.text above is optional chaining.
  - Write this statement out long hand using != nil for each element and print the unwrapped text value
  */
-var text: String?
-if vanillaCell != nil {
-    if vanillaCell!.textLabel != nil {
-        if vanillaCell!.textLabel!.text != nil {
-            text = vanillaCell!.textLabel!.text
-        } else {
-            text = nil
-        }
-    } else {
-        text = nil
-    }
-} else {
-    text = nil
-}
+
+
 
 
 
