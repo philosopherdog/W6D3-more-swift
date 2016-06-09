@@ -212,12 +212,13 @@ let libraryCardNot = citizen?.libraryCard?.number
 
 libraryCardNot // nil
 
+// Creating another one
 let libraryCard = LibraryCard(number: 12)
 
 let citizen2:Citizen? = Citizen()
 citizen2?.libraryCard = libraryCard
 let number = citizen2?.libraryCard?.number
-print(number) // NOTICE returns an OPTIONAL if successful, otherwise nil, but each of the elements is unwrapped if it contains a value expect the final one
+number // NOTICE number is still an OPTIONAL even if the citizen2 and libraryCard both are not nil, otherwise number would be nil. The whole expression itself is still an optional. To force unwrap it you have to put brackets around the whole expression and use the bang operator
 
 //: Why do we need optional chaining!?
 //: citizen2.libraryCard?.number replaces the following mess!

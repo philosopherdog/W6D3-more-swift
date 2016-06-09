@@ -34,7 +34,7 @@ case .IncorrectLogin:
 }
 
 //: Enums as String values
-class MyViewController:UIViewController {
+class MyCoolController:UIViewController {
     
     enum SegueIdentifier:String {
         case MasterViewController
@@ -72,7 +72,7 @@ enum Direction:String {
 }
 
 let direction = Direction()
-print(direction.rawValue)
+print(direction) // NOTICE: I don't need to call "rawValue" to get the string
 
 //: Auto Increment
 
@@ -81,7 +81,7 @@ enum WorkDay:Int {
 }
 
 let workDay = WorkDay.T
-print(workDay.rawValue)
+workDay.rawValue + 10
 
 switch workDay {
 case .M,.T:
@@ -92,35 +92,74 @@ case .F:
     print("End of Week")
 }
 
-/*: 
- ###### _Do:_
- - create an enum _Progress_
- - it has 3 cases: Unstarted, PercentComplete, and Complete
- - Percentcomplete takes a parameter labeled percent of type Int
- - make a PercentComplete and set its percent to different levels for testing
- - write a switch statement
- - the PercentComplete should have 3 separate cases for 1-50, 51-75, 76-99 
- - bind the percent to a constant and write a where clause for each case and print something according to the percent complete
- */
 enum Progress {
     case Unstarted
     case PercentComplete(percent: Int)
     case Complete
 }
 
-let percentComplete = Progress.PercentComplete(percent:90)
+let percentComplete = Progress.PercentComplete(percent:76)
+
 switch percentComplete {
-case .PercentComplete (let percent) where 1...50 ~= percent:
+case .PercentComplete (let thePercent) where 1...50 ~= thePercent:
     print("keep going")
-case .PercentComplete (let percent) where 51...75 ~= percent:
+case .PercentComplete (let thePercent) where 51...75 ~= thePercent:
     print("Almost there")
-case .PercentComplete (let percent) where 76...99 ~= percent:
+case .PercentComplete (let thePercent) where 76...99 ~= thePercent:
     print("Good as done")
+case .Complete:
+    print("I'm done!")
+case Progress.Unstarted:
+    print("Everyone has to start somewhere")
 default:
-    print("default")
+    print("required in this case")
 }
 
 
+
+struct BlackjackCard {
+    
+    // nested Suit enumeration
+    enum Suit: Character {
+        case Spades = "♠", Hearts = "♡", Diamonds = "♢", Clubs = "♣"
+    }
+    
+    // nested Rank enumeration
+    enum Rank: Int {
+        case Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten
+        case Jack, Queen, King, Ace
+        struct Values {
+            let first: Int
+            let second: Int?
+        }
+        var values: Values {
+            switch self {
+            case .Ace:
+                return Values(first: 1, second: 11)
+            case .Jack, .Queen, .King:
+                return Values(first: 10, second: nil)
+            default:
+                return Values(first: self.rawValue, second: nil)
+            }
+        }
+    }
+    
+    // BlackjackCard properties and methods
+    let rank: Rank, suit: Suit
+    var description: String {
+        var output = "suit is \(suit.rawValue),"
+        output += " value is \(rank.values.first)"
+        if let second = rank.values.second {
+            output += " or \(second)"
+        }
+        return output
+    }
+}
+
+let card = BlackjackCard(rank: .Ace, suit: .Clubs)
+card.description
+card.suit.rawValue
+card.rank.values.first
 
 
 //: [Next](@next)
