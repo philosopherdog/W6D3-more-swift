@@ -13,7 +13,6 @@ import Foundation
  - How do you do this in objc?
  */
 
-
 struct ToDo {
     enum Priority: String {
         case High, Medium, Low
@@ -22,52 +21,74 @@ struct ToDo {
     var priority: Priority?
 }
 
-var todoItem:[ToDo] = [] {
-didSet {
-    // sleep(2)
-    print("didSet called", oldValue.last?.text)
-}
-willSet {
-    // sleep(2)
-    print("willSet called", newValue.last?.text)
-}
-}
+var todoArray:[ToDo] = [] {
 
+    willSet {
+        sleep(2)
+        print("===>> willSet called", newValue.last?.text)
+    }
+    didSet {
+        sleep(2)
+        print("===>> didSet called", oldValue.last?.text)
+    }
+/*
+ // DON'T DO THIS -Krusty
+    willSet (newValueWithUnexpectedName) {
+        sleep(2)
+    print("===>> willSet called", newValueWithUnexpectedName.last?.text)
+ }
+ */
 
+/*
+// DON'T DO THIS -Krusty
+    didSet (newValueWithUnexpectedName){
+        sleep(2)
+        print("===>> didSet called", newValueWithUnexpectedName.last?.text)
+    }
+ */
+}
 
 let todo1 = ToDo(text: "Pick up lettuce", priority: ToDo.Priority.High)
-todoItem.append(todo1)
-let todo2 = ToDo(text: "Pick up nuts", priority: ToDo.Priority.Low)
-todoItem.append(todo2)
 
-/*:
- ##### _Do:_
- - Create a class called LibraryCard
- - Create a custom init that takes an Int parameter called _number_
- - Assign a default value to _number_ property
- - When you create a LibraryCard generate a random number to pass to the _number_ param.
- - Add a property observer to the _number_ property and intercept _didSet_ and _willSet_
- - Print the old/default value in willSet and the new value in didSet
- - Create an empty array that holds LibraryCards
- - Write a forin loop that creates 20 cards and adds them to the array
+todoArray.append(todo1)
+
+let todo2 = ToDo(text: "Get nuts", priority: ToDo.Priority.Low)
+
+todoArray.append(todo2)
+
+/*: 
+ - "Your code should minimize mental dissonance". -Krusty
+ - Question: Why does using the given parameter _newValue/oldValue_ minimize dissonance over using a custom parameter name?
  */
+
+/*: 
+ Question:
+ - _willSet_ has a default param _newValue_
+ - Why doesn't it have a param _oldValue_ ?
+ - _didSet_ has a default param _oldValue_
+ - Why doesn't it have a param _newValue_ ?
+ */
+
 class LibraryCard {
     var number = 11223 {
-        didSet {
-            print("didSet newValue \(oldValue), the new value is \(number)")
-        }
         willSet {
-            print("willSet oldValue \(newValue) and the old value is \(number)")
+            print("willSet's oldValue == \(number) --- newValue == \(newValue)")
+        }
+        didSet {
+            print("didSet's oldValue == \(oldValue) --- newValue \(number)")
         }
     }
 }
 
 var lib: [LibraryCard] = []
 
-for i in 1...20 {
-    let lib = LibraryCard()
-    lib.number = Int(arc4random_uniform(1000+1))
+for i in 1...4 {
+    let l = LibraryCard()
+    l.number = Int(arc4random_uniform(1000+1))
+    lib.append(l)
 }
+
+lib
 
 /*:
  ##### Computed Properties
@@ -85,14 +106,26 @@ var fullName: String {
 
 fullName
 
-class Person {}
+// example using a class extension
+
+class Person {
+    var firstName: String
+    var lastName: String
+    init(firstName:String, lastName:String) {
+        self.firstName = firstName
+        self.lastName = lastName
+    }
+}
 
 extension Person {
-    // extensions cannot contain stored properties
-    var name: String {
-        return "Fred"
+    // extensions cannot contain stored properties on the instance
+    var fullName: String {
+        return firstName + " " + lastName
     }
-    // but I can put a struct/class inside the extension with a stored property.
+    
+    static var storedStatic = "I'm a static stored on an extension"
+    
+    // but I can put a struct/class inside the extension with a stored property. (Notice this is not stored on the instance)
     struct MyInnerStruct {
         var name: String
     }
@@ -101,15 +134,20 @@ extension Person {
     }
 }
 
-Person().name
+let person = Person(firstName: "Jane", lastName: "Doe")
+person.fullName
+
 let result = Person.MyInnerStruct(name:"Jane")
 result.name
 
 Person.MyInnerClass().name
+
+Person.storedStatic
+Person.storedStatic = "another value"
+Person.storedStatic
+
 /*:
- - Question: Why don't computed properties need property observers?
+ - Question: Why don't computed properties have property observers?
  */
-
-
 
 //: [Next](@next)

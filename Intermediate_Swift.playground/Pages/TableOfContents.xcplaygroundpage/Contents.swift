@@ -23,7 +23,7 @@ import UIKit
  
  [Tuples](Tuples)
  
- [Property Observers](PropertyObservers)
+ [Property Observers & Computed Properties](PropertyObservers)
  
  [Closures](Closures)
  

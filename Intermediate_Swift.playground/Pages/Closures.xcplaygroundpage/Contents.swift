@@ -6,7 +6,8 @@ import UIKit
  ### **Named Closures (AKA Functions)**
  - "Closures are self-contained blocks of functionality that can be passed around and used in your code"
  - By this definition ordinary functions in Swift are closures!
- - Closures can also capture value from outside their scope (More on this below)
+ - Closures/Functions can also capture value from outside their scope (More on this below)
+ - Closures/Functions are known as _first class citizens_. What does this mean?
  */
 
 /*:
@@ -17,11 +18,13 @@ func myFunc() {
     print("Function passed to another function")
 }
 
-let functionConstant = myFunc // passing a func to a variable/constant
+let functionConstant = myFunc // assigning a function to a let/var (notice the "()" brackets are ommitted, so we are not calling it)
 /*:
-func that takes a func paramater
+Example of a func that takes a func paramater
  */
 func funkyFunc(f:()->()) {
+    #function
+    print("===>>> funkyFunc is executing")
     f()
 }
 
@@ -31,9 +34,9 @@ funkyFunc(functionConstant)
 /*:
 Using typealias for readability
 */
-typealias simpleFunc = ()->()
+typealias SimpleFuncType = ()->()
 
-func funkyFunc2(f:simpleFunc) {
+func funkyFunc2(f:SimpleFuncType) {
     f()
 }
 
@@ -42,28 +45,32 @@ funkyFunc2(myFunc)
 /*:
  ##### Using Functions in CallBacks
  - Plain functions can be passed to another object to be used as a callback or completion handler
- - Apple uses this in all modern parts of the SDK (blocks weren't added to objc until 2007 I think)
+ - Apple uses this in all modern parts of the SDK
  */
 class MasterViewController:UIViewController {
-    var detailViewController: DetailViewController?
-    
-    func completionHandler(data:String) {
-        print("Master is printing data sent from detail: \(data)")
-    }
+    var detailViewController: DetailViewController! // why is this an implicitly unwrapped optional?
     
     func fakeEventFired() {
         detailViewController = DetailViewController()
-        detailViewController!.completionHandler = completionHandler
+        detailViewController.completionHandler = completionHandler
+    }
+}
+
+extension MasterViewController {
+    func completionHandler(data:String) {
+        print("Master is printing data sent from detail: \(data)")
     }
 }
 
 class DetailViewController: UIViewController {
-    typealias callBack = (data:String)->(Void)
-    var completionHandler:callBack!
+    
+    typealias CallBack = (data:String)->(Void)
+    
+    var completionHandler:CallBack!
     
     func fakeButtonTap() {
         // do some long running task
-        // sleep(2)
+        sleep(2)
         // get some user input
         let fakeUserData = "Pick up milk"
         completionHandler(data:fakeUserData)
@@ -75,31 +82,26 @@ masterViewController.fakeEventFired()
 masterViewController.detailViewController?.fakeButtonTap()
 
 /*:
- ##### _Do:_
- - Question: When would it be better to use delegation over function/closure callbacks?
- - Download starter project
- - Write a function on MasterViewController that takes a String parameter (don't copy/paste please)
- - MasterViewController's `updateWithData` method will take the passed in data and update the label
- - In the DetailViewController make a property that allows you to pass Master's `updateWithData` function
- - In prepareForSegue assign Master's `updateWithData` to the property on Detail
- - Call the function from the button tap on Detail
- */
-
-/*:
- ##### **Unnamed Closures**
+ ##### **Unnamed Functions AKA CLOSURES**
  Closures are just like functions except they are unnamed
  */
-/*: closure so simple you can't call it! */
+/*: A closure so simple you can't call it! */
 //{
 //    print("the world's simplest closure")
 //}
 
 
+// Here I assign a simple closure to a let
 let close1 = { print("hello closure!") }
+/*
+ Compared to objc
+ void (^closeObjc)(void) = ^{ NSLog(@"hello objc!"; }
+ */
 
 close1() // call it
+// closeObjc()
 /*:
-pass it to a function
+passing a named closure to a function
 */
 func f1(close:()->()) {
     close()
@@ -107,7 +109,7 @@ func f1(close:()->()) {
 
 f1(close1)
 /*:
-closure with a paramater and no return value
+closure with a String paramater and no return value
 */
 let close2 = {
     (s: String) -> Void in
@@ -137,10 +139,8 @@ let result = multiply(12, 10)
  - These closures should probably take no inputs but just print out a message (it's up to you)
  - Write a forin loop and call each closure
  */
-let closureArray:[()->()] = [{print("hello")}, {print("Light")}, {print("House")}]
-for item in closureArray {
-    item()
-}
+
+
 /*:
  #### Why Closures?
  - If functions just are named closures, then why do we need closures at all?
@@ -169,7 +169,7 @@ foods.sort({
 /*:
  - Closure expressions that are passed inline to a function parameter can be greatly simplified because the compiler can infer its type
  - The `sort(_:)` function expects a closure that has 2 parameters of the same type that can be compared, and it returns a Bool
- - Based on this, the compiler can infer the closure type and we don't need to explicitly specify it like this
+ - Based on this, the compiler can infer the closure type and we don't need to explicitly specify it like this (We can omit the parameter types and the return type.
  */
 
 foods.sort({ item1, item2 in return item1 < item2 })
@@ -259,49 +259,36 @@ myInnerFunc()
 
 /*:
  ##### _Do:_
- Rewrite the last function using a closure:
+ Rewrite the last function using a closure, call it outerFunc3():
  */
-/*
- var num = 10
- func innerFunc()-> Int {
- num += 20
- return num
- }
- return innerFunc
- */
-func outerFunc3()->(()->Int) {
-    var num = 10
-    return {
-        num += 20
-        return num
-    }
-}
-
-let f6 = outerFunc3()
-f6()
 
  
 
 /*:
  ###### _Capture List_:
  - Notice that nested functions & closures capture value by reference.
- - This means that the values capture can be mutated, which might not be what you want (objc blocks capture by value BTW)
- - Swift uses something called a _capture list_ to capture by value
+ - This means that the values capture can be mutated, which might not be what you want (Question: do objc blocks capture by reference or value?)
+ - Swift uses something called a _capture list_ to "turn off capture by reference"
  */
 
-var y = 10
+// example showing capture by reference again
 
-let close4 = {[y] in print("==>", y)
-}
+var z = 10
+let close5 = { print("~~~>", z)}
+z += 20
+close5()
+
+var y = 10
+let close4 = {[y] in print("==>", y)}
 y = 12
 
-close4() // prints 10, 12 without the capture list
+close4() // prints 10
 
 
 /*:
  ##### **Higher Order Functions**
- - Basically functions that take functions/closure and/or return them are called _Higher Order functions_
- - Swift has some important build in Higher Order functions, besides `sort()`
+ - Basically functions that take functions/closures and/or return them are called _Higher Order functions_. They are functions that act on other functions.
+ - Swift has some important built in Higher Order functions, besides `sort()`
  - Let's look briefly at `map()`, `reduce()`, `filter()` (this is just an introduction)
  */
 
@@ -315,17 +302,20 @@ let arr1 = [Int](1...10)
 let result2 = arr1.map({ (num:Int) -> String in
     return "\(num)"
 })
+arr1
+result2
 
 /*: 
  ##### _Do:_
- Simplify map using some of the techniques we talked about earlier:
+ Simplify the map statement above using the techniques we talked about earlier:
  */
-let result3 = arr1.map{"\($0)"}
+
+
 /*:
  ##### `reduce()`
  Similar to the `map()` but it reduces all of the elements to a single value
  */
-// old way
+// long way
 var result7 = 0
 for item in arr1 {
     result7 += item
@@ -333,26 +323,38 @@ for item in arr1 {
 result7
 
 // reduce way
-let sum = arr1.reduce(0){ $0 + $1}
+let sum = arr1.reduce(0){ (num1: Int, num2: Int)-> Int in num1 + num2}
 sum
+
+/*:
+ ##### _Do:_
+ Simplify the reduce statement above as much as you can:
+ */
 
 /*: 
  ###### _`filter()`_
  Takes a closure and returns an array filtered according to whether it passes the test in the expression
 */
 
-// forin way
+// forin long way
 var result4: [Int] = []
 for item in arr1 {
-    if item%3 == 0 {
+    if item % 3 == 0 {
         result4.append(item)
     }
 }
 result4
 
 // filter way
-let result8 = arr1.filter{ $0%3 == 0 }
+let result8 = arr1.filter({(num: Int) -> Bool in
+    return num % 3 == 0
+})
 result8
+
+/*:
+ ##### _Do:_
+ Simplify the filter statement above as much as you can:
+ */
 
 /*:
  ##### _Do:_
@@ -367,10 +369,12 @@ struct Data {
     let age: Int
 }
 
-let dataArray = [Data(firstName: "Jen", lastName: "Jones", age: 22),
-Data(firstName: "Jim", lastName: "Jones", age: 33),
-Data(firstName: "Jim", lastName: "Hendrix", age: 44),
-Data(firstName: "Jenny", lastName: "Craig", age: 20)]
+let dataArray = [
+    Data(firstName: "Ernie", lastName: "Slack", age: 62),
+    Data(firstName: "Jim", lastName: "Jones", age: 33),
+    Data(firstName: "Cray", lastName: "Lee", age: 44),
+    Data(firstName: "Fats", lastName: "Way", age: 20)
+]
 
 dataArray
 
@@ -378,31 +382,25 @@ dataArray
  ##### _Do:_
  - Using `map()` get an array of firstName lastName as a single string
  */
-let arrayOfStrings: [String] = dataArray.map{ $0.firstName + " " + $0.lastName }
-arrayOfStrings
 
 
 /*:
  ##### _Do:_
- - You can chain these functions together.
- - Add sort so that it lists the names in ascending order:
+ - You can chain these expressions together.
+ - Take the our first map expression and use the sort expression to sort the names in ascending order
  */
-let arrayOfStrings2: [String] = dataArray.map{ $0.firstName + " " + $0.lastName }.sort(<)
-arrayOfStrings2
+
 
 /*:
  ##### _Do:_
  - Using `reduce()` get the average age
  */
-let result12 = dataArray.reduce(0){ $0 + $1.age }/dataArray.count
-result12
+
 
 /*:
  ##### _Do:_
  - Using `filter()` get only those people whose name is "Jim"
  */
-let result13 = dataArray.filter{ $0.firstName == "Jim" }
-result13
 
 
 
