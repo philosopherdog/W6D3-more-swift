@@ -14,7 +14,7 @@ import UIKit
  */
 /*:
  ##### **Basic Example:** */
-var numString = "45"
+var numString = "45l"
 
 let result6 = Int(numString) // Int() Converts a String to Int?
 print(result6)
@@ -24,6 +24,15 @@ print(result6)
  - write a conditional binding statement to unwrap result6
  */
 
+if result6 != nil {
+    print(result6!)
+}
+
+if let result6 = result6 {
+    print(result6)
+} else {
+    print(result6)
+}
 
 /*: -------------------- */
 /*:
@@ -36,7 +45,16 @@ print(result6)
  */
 
 var valueMustBeThere: Int? = 12
-valueMustBeThere!
+//valueMustBeThere!
+
+//
+//class MyViewController: UIViewController {
+//    var myVar: String?
+//    override func viewDidLoad() {
+//        myVar = "something"
+//    }
+//}
+
 
 /*:
  ##### _Do:_
@@ -44,10 +62,47 @@ valueMustBeThere!
  */
 
 // a) nil check
+if valueMustBeThere != nil {
+    print("You have to unwrap it here")
+}
 
 // b) optional binding
+if var valueMustBeThere = valueMustBeThere {
+    valueMustBeThere + 10
+}
 
 // c) guard
+
+guard let valueMustBeThere = valueMustBeThere else {
+    fatalError()
+}
+
+valueMustBeThere + 33
+
+//class LibraryCard {
+//    let number:Int
+//    init(num:Int) {
+//        self.number = num
+//    }
+//}
+//
+//class Person {
+//    var libraryCard:LibraryCard?
+//    init(libraryCard:LibraryCard?) {
+//        self.libraryCard = libraryCard
+//    }
+//}
+//
+//let p1 = Person(libraryCard: nil)
+//var myNum:Int? = 234
+//myNum // Optional(234)
+//myNum! // 234
+//myNum = nil
+//
+//
+//let p2 = Person(libraryCard: LibraryCard(num: myNum!))
+
+
 
 
 
@@ -85,7 +140,7 @@ let result7 = name ?? "Slim Freddy"
 var age: Int? = 20
 
 // ternary version
-let result3 = age != nil ? age : 30
+let result3 = age != nil ? age! : 30
 //: - Notice nil coalescing does implicit nil checking (try removing != nil from the ternary operator).
 //: - Nil coalsecing implicitly uses the unwrapped optional if not nil.
 // nil coalescing version
@@ -144,7 +199,7 @@ myCell
 
 //: I'm upcasting here (Look ma no _as_)
 // Notice I don't need to:
-// vanillaCell = myCell as? UITableViewCell
+// vanillaCell = myCell as UITableViewCell
 vanillaCell = myCell
 print((vanillaCell?.textLabel?.text)!)
 
@@ -223,51 +278,51 @@ number // NOTICE number is still an OPTIONAL even if the citizen2 and libraryCar
 //: Why do we need optional chaining!?
 //: citizen2.libraryCard?.number replaces the following mess!
 
-var result9: Int?
-if citizen2 != nil {
-    if citizen2!.libraryCard != nil {
-        result9 = citizen2!.libraryCard!.number
-        print(result9)
-    } else {
-        result9 = nil
-    }
-} else {
-    result9 = nil
-}
-
-print(result9)
+//var result9: Int?
+//if citizen2 != nil {
+//    if citizen2!.libraryCard != nil {
+//        result9 = citizen2!.libraryCard!.number
+//        print(result9)
+//    } else {
+//        result9 = nil
+//    }
+//} else {
+//    result9 = nil
+//}
+//
+//print(result9)
 
 // same thing with guard
-/*
-guard let citizen2 = citizen2 else {
+
+guard let citizen2 = citizen2, let libraryCard = citizen2.libraryCard  else {
     fatalError()
 }
 
-guard let libraryCard = citizen2.libraryCard else {
-    fatalError()
-}
+//guard let libraryCard = citizen2.libraryCard else {
+//    fatalError()
+//}
  libraryCard.number
-*/
+
 
 
 // here it is using optional binding.
 
-if let citizen2 = citizen2 {
-    if let libraryCard = citizen2.libraryCard {
-    print(libraryCard.number)
-    }
-}
-
-// I can also drop the nesting and do it inline
-if let citizen2 = citizen2, libraryCard = citizen2.libraryCard {
-    print(libraryCard.number)
-}
+//if let citizen2 = citizen2 {
+//    if let libraryCard = citizen2.libraryCard {
+//    print(libraryCard.number)
+//    }
+//}
+//
+//// I can also drop the nesting and do it inline
+//if let citizen2 = citizen2, libraryCard = citizen2.libraryCard {
+//    print(libraryCard.number)
+//}
 
 
 /*:
  ##### _Do On Your Own:_
  - vanillaCell?.textLabel?.text above is optional chaining.
- - Write this statement out long hand using != nil for each element and print the unwrapped text value
+ - Write this statement out long hand using != nil for each element and print the unwrapped text value. Do it using guard let and if let as well.
  */
 
 

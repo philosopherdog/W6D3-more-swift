@@ -10,7 +10,6 @@ import UIKit
  - enum types are limited to Int, Float, String, Bool
  - access values using _.rawValue_
  - you can init an enum using it's associated raw value
- - `let rightMovement = Movement(rawValue: "right")`
  */
 
 //: Basic example:
@@ -74,11 +73,16 @@ enum Direction:String {
 let direction = Direction()
 print(direction) // NOTICE: I don't need to call "rawValue" to get the string
 
-//: Auto Increment
+//: Like objc enums Int values auto increment
 
 enum WorkDay:Int {
     case M=1,T,W,R,F
 }
+
+//: Initialize with a rawValue like this
+let thurs = 4
+let workDay2 = WorkDay(rawValue: thurs)
+workDay2
 
 let workDay = WorkDay.T
 workDay.rawValue + 10

@@ -22,7 +22,7 @@ let functionConstant = myFunc // assigning a function to a let/var (notice the "
 /*:
 Example of a func that takes a func paramater
  */
-func funkyFunc(f:()->()) {
+func funkyFunc(f:(Void)->Void) {
     #function
     print("===>>> funkyFunc is executing")
     f()
@@ -51,14 +51,14 @@ class MasterViewController:UIViewController {
     var detailViewController: DetailViewController! // why is this an implicitly unwrapped optional?
     
     func fakeEventFired() {
-        detailViewController = DetailViewController()
+//        detailViewController = DetailViewController()
         detailViewController.completionHandler = completionHandler
     }
 }
 
 extension MasterViewController {
-    func completionHandler(data:String) {
-        print("Master is printing data sent from detail: \(data)")
+    func completionHandler(d:String)->Void {
+        print("Master is printing data sent from detail: \(d)")
     }
 }
 
@@ -76,10 +76,10 @@ class DetailViewController: UIViewController {
         completionHandler(data:fakeUserData)
     }
 }
-
-let masterViewController = MasterViewController()
-masterViewController.fakeEventFired()
-masterViewController.detailViewController?.fakeButtonTap()
+//
+//let masterViewController = MasterViewController()
+//masterViewController.fakeEventFired()
+//masterViewController.detailViewController?.fakeButtonTap()
 
 /*:
  ##### **Unnamed Functions AKA CLOSURES**
@@ -88,7 +88,7 @@ masterViewController.detailViewController?.fakeButtonTap()
 /*: A closure so simple you can't call it! */
 //{
 //    print("the world's simplest closure")
-//}
+//}()
 
 
 // Here I assign a simple closure to a let
@@ -139,7 +139,11 @@ let result = multiply(12, 10)
  - These closures should probably take no inputs but just print out a message (it's up to you)
  - Write a forin loop and call each closure
  */
+var myClosures = [{ print("Hello") }, {print("You")} ]
 
+for item in myClosures {
+    item()
+}
 
 /*:
  #### Why Closures?
@@ -240,7 +244,7 @@ outerFunc()
  Instead of executing the inner function internally, let's return it:
  */
 
-func outerFunc2()->(()->Int) {
+func outerFunc2() -> ( ()-> Int ) {
     var num = 10
     func innerFunc()-> Int {
         num += 20
@@ -309,7 +313,8 @@ result2
  ##### _Do:_
  Simplify the map statement above using the techniques we talked about earlier:
  */
-
+let result22 = arr1.map{"\($0)"}
+result22
 
 /*:
  ##### `reduce()`
@@ -330,7 +335,8 @@ sum
  ##### _Do:_
  Simplify the reduce statement above as much as you can:
  */
-
+let sum22 = arr1.reduce(0){ $0 + $1}
+sum22
 /*: 
  ###### _`filter()`_
  Takes a closure and returns an array filtered according to whether it passes the test in the expression
@@ -346,9 +352,7 @@ for item in arr1 {
 result4
 
 // filter way
-let result8 = arr1.filter({(num: Int) -> Bool in
-    return num % 3 == 0
-})
+let result8 = arr1.filter{$0 % 3 == 0}
 result8
 
 /*:
@@ -382,26 +386,31 @@ dataArray
  ##### _Do:_
  - Using `map()` get an array of firstName lastName as a single string
  */
-
+let fullName = dataArray.map(){ $0.firstName + " "  + $0.lastName}
+fullName
 
 /*:
  ##### _Do:_
  - You can chain these expressions together.
  - Take the our first map expression and use the sort expression to sort the names in ascending order
  */
-
+let fullName2 = dataArray.map(){ $0.firstName + " "  + $0.lastName}.sort(<)
+fullName2
 
 /*:
  ##### _Do:_
  - Using `reduce()` get the average age
  */
+let reduceMe = dataArray.reduce(0){ $0 + $1.age }/dataArray.count
 
+reduceMe
 
 /*:
  ##### _Do:_
  - Using `filter()` get only those people whose name is "Jim"
  */
-
+let jimObject = dataArray.filter(){ $0.firstName  == "Jim" || $0.lastName == "Jim" }
+jimObject
 
 
 
