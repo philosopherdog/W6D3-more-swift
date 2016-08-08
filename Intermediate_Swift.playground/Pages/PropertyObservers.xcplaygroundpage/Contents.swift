@@ -9,8 +9,9 @@ import Foundation
  - `willSet`: is called just before a property is set, which allows you to grab the old value
  - `didSet` is called just after a property is set
  - The most common use case is when you want to update your interface once a property has been set
- - `willSet` is most commonly used when you need to make use of the old value
- - How do you do this in objc?
+ - `willSet` is most commonly used when you need to make use of an existing value before it gets set to a new value
+ - How do you do this in Objc?
+ - Properties in Swift are not functions like Objc. So if you see someone calling `func setFoo(foo:Foo){self.foo = foo}` in Swift they're most like doing something wrong.
  */
 
 struct ToDo {
@@ -25,10 +26,12 @@ var todoArray:[ToDo] = [] {
 
     willSet {
         sleep(2)
+        // newValue is the default name given to incoming value
         print("===>> willSet called", newValue.last?.text)
     }
     didSet {
         sleep(2)
+        // oldValue is the default name given to old value
         print("===>> didSet called", oldValue.last?.text)
     }
 /*
@@ -41,9 +44,9 @@ var todoArray:[ToDo] = [] {
 
 /*
 // DON'T DO THIS -Krusty
-    didSet (newValueWithUnexpectedName){
+    didSet (oldValueWithUnexpectedName){
         sleep(2)
-        print("===>> didSet called", newValueWithUnexpectedName.last?.text)
+        print("===>> didSet called", oldValueWithUnexpectedName.last?.text)
     }
  */
 }
@@ -57,38 +60,38 @@ let todo2 = ToDo(text: "Get nuts", priority: ToDo.Priority.Low)
 todoArray.append(todo2)
 
 /*: 
- - "Your code should minimize mental dissonance". -Krusty
- - Question: Why does using the given parameter _newValue/oldValue_ minimize dissonance over using a custom parameter name?
- */
-
-/*: 
  Question:
  - _willSet_ has a default param _newValue_
- - Why doesn't it have a param _oldValue_ ?
+ - Why doesn't it also have a param _oldValue_ ?
  - _didSet_ has a default param _oldValue_
- - Why doesn't it have a param _newValue_ ?
+ - Why doesn't it also have a param _newValue_ ?
  */
 
-class LibraryCard {
+class LibraryCard:CustomStringConvertible {
     var number = 11223 {
         willSet {
-            print("willSet's oldValue == \(number) --- newValue == \(newValue)")
+            print(#line, "willSet's oldValue == \(number) --- newValue == \(newValue)")
         }
         didSet {
-            print("didSet's oldValue == \(oldValue) --- newValue \(number)")
+            print(#line, "didSet's oldValue == \(oldValue) --- newValue \(number)")
         }
     }
+    var description: String {
+        return "card: \(number)"
+    }
 }
+
+print(#line, Int(arc4random_uniform(3)))
 
 var lib: [LibraryCard] = []
 
 for i in 1...4 {
     let l = LibraryCard()
-    l.number = Int(arc4random_uniform(1000+1))
+    l.number = Int(arc4random_uniform(1000+1)) // 1-1000 inclusive
     lib.append(l)
 }
 
-lib
+print(#line, lib)
 
 /*:
  ##### Computed Properties
@@ -104,13 +107,13 @@ var fullName: String {
     return firstName + " " + lastName
 }
 
-fullName
+print(#line, fullName)
 
 // example using a class extension
 
 class Person {
-    var firstName: String
-    var lastName: String
+    private var firstName: String
+    private var lastName: String
     init(firstName:String, lastName:String) {
         self.firstName = firstName
         self.lastName = lastName
@@ -123,7 +126,7 @@ extension Person {
         return firstName + " " + lastName
     }
     
-    static var storedStatic = "I'm a static stored on an extension"
+    static var storedStatic = "I'm a static stored on an extension so I'm not a stored instance property"
     
     // but I can put a struct/class inside the extension with a stored property. (Notice this is not stored on the instance)
     struct MyInnerStruct {
@@ -135,10 +138,10 @@ extension Person {
 }
 
 let person = Person(firstName: "Jane", lastName: "Doe")
-person.fullName
+print(#line, person.fullName)
 
 let result = Person.MyInnerStruct(name:"Jane")
-result.name
+print(#line, result.name)
 
 Person.MyInnerClass().name
 

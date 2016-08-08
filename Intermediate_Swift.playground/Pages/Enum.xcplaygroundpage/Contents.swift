@@ -21,15 +21,15 @@ enum LoginErrorMessages:String {
 
 let message = LoginErrorMessages.IncorrectLogin
 
-print(message.rawValue)
+print(#line, message.rawValue)
 
 switch message {
 case .NoPassword:
-    print(message.rawValue)
+    print(#line, message.rawValue)
 case .NoUserName:
-    print(message.rawValue)
+    print(#line, message.rawValue)
 case .IncorrectLogin:
-    print(message.rawValue)
+    print(#line, message.rawValue)
 }
 
 //: Enums as String values
@@ -56,9 +56,9 @@ let student = MidtermScore.Steve(score: 20)
 
 switch student {
 case .Steve (let score):
-    print("score is \(score)")
+    print(#line, "score is \(score)")
 default:
-    print("cases must be exaustive")
+    print(#line, "cases must be exaustive")
 }
 
 //: Init and Enums
@@ -71,9 +71,9 @@ enum Direction:String {
 }
 
 let direction = Direction()
-print(direction) // NOTICE: I don't need to call "rawValue" to get the string
+print(#line, direction)
 
-//: Like objc enums Int values auto increment
+//: Like Objc enums Int values auto increment
 
 enum WorkDay:Int {
     case M=1,T,W,R,F
@@ -81,19 +81,20 @@ enum WorkDay:Int {
 
 //: Initialize with a rawValue like this
 let thurs = 4
+//: Notice this rawValue initializer returns an optional as you would expect
 let workDay2 = WorkDay(rawValue: thurs)
-workDay2
+print(#line, workDay2)
 
 let workDay = WorkDay.T
-workDay.rawValue + 10
+print(#line, workDay.rawValue + 10)
 
 switch workDay {
 case .M,.T:
-    print("Early Week")
+    print(#line, "Early Week")
 case .W,.R:
-    print("Mid Week")
+    print(#line, "Mid Week")
 case .F:
-    print("End of Week")
+    print(#line, "End of Week")
 }
 
 enum Progress {
@@ -106,22 +107,22 @@ let percentComplete = Progress.PercentComplete(percent:76)
 
 switch percentComplete {
 case .PercentComplete (let thePercent) where 1...50 ~= thePercent:
-    print("keep going")
+    print(#line, "keep going")
 case .PercentComplete (let thePercent) where 51...75 ~= thePercent:
-    print("Almost there")
+    print(#line, "Almost there")
 case .PercentComplete (let thePercent) where 76...99 ~= thePercent:
-    print("Good as done")
+    print(#line, "Good as done")
 case .Complete:
-    print("I'm done!")
+    print(#line, "I'm done!")
 case Progress.Unstarted:
-    print("Everyone has to start somewhere")
+    print(#line, "Everyone has to start somewhere")
 default:
-    print("required in this case")
+    print(#line, "required in this case")
 }
 
 
 
-struct BlackjackCard {
+struct BlackjackCard:CustomStringConvertible {
     
     // nested Suit enumeration
     enum Suit: Character {
@@ -161,9 +162,13 @@ struct BlackjackCard {
 }
 
 let card = BlackjackCard(rank: .Ace, suit: .Clubs)
-card.description
-card.suit.rawValue
-card.rank.values.first
+print(#line, card)
+print(#line, card.suit.rawValue)
+print(#line, card.rank.values.first)
 
+let card2 = BlackjackCard(rank: .Eight, suit: .Diamonds)
+print(#line, card2)
+print(#line, card2.suit.rawValue)
+print(#line, card2.rank.values.first)
 
 //: [Next](@next)
