@@ -94,6 +94,7 @@ class DetailViewController: UIViewController {
  Closures are just like functions except they are *unnamed*!
  */
 /*: World's simplest Swift closure! Takes no paramaters and returns nothing. */
+
 _ = {
     print(#line, "the world's simplest closure")
 }()
@@ -108,6 +109,7 @@ let close1 = { print(#line, "hello closure!") }
  */
 
 close1() // call it using the assigned constant
+
 // closeObjc()
 /*:
  passing a named closure to a function
@@ -127,7 +129,7 @@ f1({
 })
 
 /*:
- closure with a String paramater and no return value
+ closure with a String parameter and no return value
  */
 let close2 = {
     (s: String) -> Void in
@@ -156,7 +158,7 @@ let result = multiply(12, 10)
  ##### _Do:_
  - Add a few simple closures to an array
  - These closures should probably take no inputs but just print out a message (it's up to you)
- - Write a forin loop and call each closure
+ - Write a forin loop and invoke each closure
  */
 
 
@@ -279,13 +281,13 @@ print(#line, myInnerFunc())
 
 /*:
  ##### _Do:_
- Rewrite the last function using a closure, call it outerFunc3():
+ Rewrite the last function using a closure, call the new function outerFunc3():
  */
 
 
 /*:
  ##### _Do:_
- Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the num value pass it in as a parameter to the closure
+ Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the 20 pass in a value as a parameter to the closure
  */
 
 
@@ -312,9 +314,47 @@ y += 20
 close4()
 
 /*: Captureing self and retain cycles
- 
- 
+ * In the lecture on debugging I demonstrated a retain cycle because self was captured
+ * If an object owns a closure, and that closure owns self, then we have a retain cycle
+ * This is why the compiler forces you to explicitly refer to self inside a closure
+ * Sometimes you may want a closure to retain self, such as when you are waiting for a network callback and you don't want self to be deallocated before the callback
+*/
+
+class TempNotifier {
+    var changeNotifier: ((Int) -> Void)?
+    var currentTemp = 72
+    init() {
+        self.changeNotifier = { (temp: Int) in
+            self.currentTemp = temp
+        }
+    }
+}
+
+/*:
+ * Difference between `[unowned self]` and `[weak self]` is that if unowned self is nil the app will crash. weak self gives you the chance of handling the case where self is possibly nil.
  */
+
+// Here's the example from the debugging lecture again
+// Why is this a retain cycle?
+
+class DetailVC:UIViewController {
+    
+    typealias Block = () -> Void
+    var closure: Block!
+
+    @IBAction func buttonTapped() {
+        closure = {
+            print("Some fake stuff")
+            self.fakeFunk()
+        }
+        closure()
+    }
+
+    func fakeFunk() {
+        print("fake funk")
+    }
+}
+
 
 /*:
  ##### **Higher Order Functions**
@@ -337,12 +377,10 @@ print(#line, arr1)
 print(#line, result2)
 
 /*:
- ##### _Do:_
- Simplify the map statement above using the techniques we talked about earlier:
+ Here's map in using terser syntax:
  */
-// remove
 let result22 = arr1.map{"\($0)"}
-result22
+print(#line, result22)
 
 /*:
  ##### `reduce()`
@@ -360,12 +398,7 @@ print(#line, result7)
 let sum = arr1.reduce(0){ (num1: Int, num2: Int)-> Int in num1 + num2}
 print(#line, sum)
 
-/*:
- ##### _Do:_
- Simplify the reduce statement above as much as you can:
- */
-
-// remove
+//: Here's the same statement simplified:
 
 let sum22 = arr1.reduce(0){ $0 + $1}
 print(#line, sum22)
@@ -391,72 +424,10 @@ let result8 = arr1.filter({
 })
 print(#line, result8)
 
-/*:
- ##### _Do:_
- Simplify the filter statement above as much as you can:
- */
+//: Here's the same expression simplified:
 
-// remove
 let result9 = arr1.filter{$0 % 3 == 0}
 print(#line, result9)
 
-/*:
- ##### _Do:_
- - Let's practice a bit
- - Below you will find an array that consists of a simple model object of type `Data`
- - Please follow the instructions for each section
- */
-
-struct Data: CustomStringConvertible {
-    let firstName: String
-    let lastName: String
-    let age: Int
-    var description: String {
-        return "\(firstName) \(lastName) \(age)"
-    }
-}
-
-let dataArray = [
-    Data(firstName: "Ernie", lastName: "Slack", age: 62),
-    Data(firstName: "Jim", lastName: "Jones", age: 33),
-    Data(firstName: "Cray", lastName: "Lee", age: 44),
-    Data(firstName: "Fats", lastName: "Way", age: 20)
-]
-
-print(#line, dataArray)
-
-/*:
- ##### _Do:_
- - Using `map()` get an array of firstName lastName as a single string
- */
-
-// remove
-let fullname = dataArray.map(){$0.firstName + " " + $0.lastName }
-print(#line, fullname)
-
-/*:
- ##### _Do:_
- - You can chain these expressions together.
- - Take our first map expression and use the sort expression to sort the names in ascending order
- */
-
-// remove
-let fullname2 = dataArray.map(){$0.firstName + " " + $0.lastName }.sort(<)
-print(#line, fullname2)
-
-/*:
- ##### _Do:_
- - Using `reduce()` get the average age
- */
-let reduceMe = dataArray.reduce(0){ $0 + $1.age }/dataArray.count
-
-print(#line, reduceMe)
-
-/*:
- ##### _Do:_
- - Using `filter()` get only those people whose name is "Jim"
- */
-let jimObject = dataArray.filter(){ $0.firstName  == "Jim" || $0.lastName == "Jim" }
-jimObject
 
 //: [Next](@next)
