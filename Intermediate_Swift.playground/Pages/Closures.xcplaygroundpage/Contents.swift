@@ -11,7 +11,7 @@ import UIKit
  */
 
 /*:
- ##### _Example of Function Parameter_
+ ##### _Example of Function Passed as Parameter_
  */
 
 func myFunc() {
@@ -19,16 +19,13 @@ func myFunc() {
 }
 
 let functionConstant = myFunc // assigning a function to a let/var (notice the "()" brackets are ommitted because we are not executing it)
-/*:
- Example of a func that takes a func paramater
- */
 
 func funkyFunc(f:(Void)-> Void) {
-    print(#function, #line, "===>>> funkyFunc is executing")
+    print(#line, "\(#function) is executing")
     f()
 }
 
-// alernative syntax. be consistent. follow your team's convention
+// alernative syntax.
 func funkyFunc1(f:()->()) {}
 func funkyFunc11(f:(Void)->()){}
 func funkyFunc111(f:()->(Void)){}
@@ -42,7 +39,7 @@ funkyFunc(functionConstant)
 typealias SimpleFuncType = ()->()
 
 func funkyFunc2(f:SimpleFuncType) {
-    print("\(#function) \(#line) executed")
+    print(#line, "\(#function) is executing")
     f()
 }
 
@@ -50,7 +47,7 @@ funkyFunc2(myFunc)
 
 /*:
  ##### Using Functions in CallBacks
- - Plain functions can be passed to another object to be used as a callback or completion handler
+ - Plain functions (or closures) can be passed to another object to be used as a callback or completion handler
  - Apple uses this in all modern parts of the SDK as an alternative or adjunct to delegation!
  */
 class MasterViewController:UIViewController {
@@ -112,7 +109,7 @@ close1() // call it using the assigned constant
 
 // closeObjc()
 /*:
- passing a named closure to a function
+ passing a closure to a function
  */
 func f1(close:()->()) {
     close()
@@ -121,7 +118,7 @@ func f1(close:()->()) {
 f1(close1)
 
 /*:
- calling the same closure and passing a closure as a literal inline!
+ calling the same closure but passing a closure as a literal!
  */
 
 f1({
@@ -132,8 +129,8 @@ f1({
  closure with a String parameter and no return value
  */
 let close2 = {
-    (s: String) -> Void in
-    print(#line, s)
+    (string: String) -> Void in
+    print(#line, string)
 }
 /*:
  calling & passing in data:
@@ -145,14 +142,20 @@ close2("How to call a closure with a string argument")
  `{ (parameters) -> returnType in statements }`
  */
 /*:
- Closure with 2 parameters and a return:
+ Closure with 2 parameters and a return. Here I'm calling it inline.
  */
-let multiply = {
+
+let someNum = 10
+let someOtherNum = 12
+
+let r11 = {
     (num1: Int, num2: Int) -> Int in
     return num1 * num2
-}
+}(someNum, someOtherNum)
 
-let result = multiply(12, 10)
+print(#line, r11)
+
+//let result = multiply(12, 10)
 
 /*:
  ##### _Do:_
@@ -161,12 +164,10 @@ let result = multiply(12, 10)
  - Write a forin loop and invoke each closure
  */
 
-
-
 /*:
  #### Why Closures?
  - If functions just are named closures, then why do we need closures at all?
- - Closures are a convenience.
+ - Closures are simply a convenience.
  - Sometimes, especially when we want to pass a function as an argument, we don't want to create a function separately and pass the name of the function. It's much more readable and convenient to pass everything inline.
  - Let's look at Swift's sort(_:) function that expects a function/closure like this.
  */
@@ -179,19 +180,25 @@ func sorter1(item1: String, item2: String) -> Bool {
     return item1 < item2
 }
 
-foods.sort(sorter1)
+let r22 = foods.sort(sorter1)
+print(#line, r22)
+
 /*:
  Doing it with a closure:
  */
-foods.sort({
+
+let r222 = foods.sort({
     (item1: String, item2: String) -> Bool in
     return item1 < item2
 })
 
+print(#line, r222)
+
 /*:
  - Closure expressions that are passed inline to a function parameter can be greatly simplified because the compiler can infer its type
  - The `sort(_:)` function expects a closure that has 2 parameters of the same type that can be compared, and it returns a Bool
- - Based on this, the compiler can infer the closure type and we don't need to explicitly specify it like this (We can omit parameter types and the return type).
+ - Based on this, the compiler can infer the closure type.
+ - So, we don't need to explicitly specify the parameter types and the return type.
  */
 
 foods.sort({ item1, item2 in return item1 < item2 })
@@ -238,12 +245,18 @@ foods.sort{
 }
 
 /*:
+ ##### _Do:_
+ Rewrite the view controller callback using a closure rather than a function from around line 53
+ */
+
+
+/*:
  ##### **Capturing Values**
  - Closures can capture constants/variables from their surrounding scope
- - Closures can use or even mutate these captured values even when they are passed to a function elsewhere
- - Swift allows nested functions
- - Nested functions can use and mutate values from the surrounding scope
- - Closures inside functions have the same behaviour
+ - Closures can use and even mutate these captured values
+ - Remember Swift allows nested functions
+ - Nested functions can use and mutate values from the surrounding scope. Remember functions are just named closures.
+ - Closures inside functions have the same behaviour as nested functions
  */
 
 func outerFunc() {
@@ -256,13 +269,13 @@ func outerFunc() {
     print(#line, "after", num)
 }
 
-outerFunc()
+outerFunc() // Explain the path of execution here and what happens
 
 /*:
  Instead of executing the inner function internally, let's return it:
  */
 
-func outerFunc2() -> ( ()-> Int ) {
+func outerFunc2() -> ( () -> Int ) {
     var num = 10
     func innerFunc()-> Int {
         num += 20
@@ -276,12 +289,12 @@ print(#line, myInnerFunc())
 print(#line, myInnerFunc())
 
 /*:
- Since we are not calling the function internally it makes no sense to name it:
+ Since we are not calling the function internally it makes no sense to name it!:
  */
 
 /*:
  ##### _Do:_
- Rewrite the last function using a closure, call the new function outerFunc3():
+ Rewrite the last function using a closure, call the new function outerFunc3() & invoke it and the closure:
  */
 
 
@@ -291,15 +304,14 @@ print(#line, myInnerFunc())
  */
 
 
-
 /*:
  ###### _Capture List_:
  - Notice that nested functions & closures capture value by reference.
- - This means that the values capture can be mutated, which might not be what you want (Question: do Objc blocks capture by reference or value?)
+ - This means that the values capture can be mutated (as long as they are vars), which might not be what you want (Question: do Objc blocks capture by reference or value?)
  - In Swift you can use something called a _capture list_ to "turn off capture by reference"
  */
 
-// example showing capture by reference again.
+// Example illustrating capture by reference again.
 // Make sure you totally understand what's going on here.
 
 var z = 10
@@ -314,7 +326,7 @@ y += 20
 close4()
 
 /*: Captureing self and retain cycles
- * In the lecture on debugging I demonstrated a retain cycle because self was captured
+ * In the lecture on debugging I demonstrated a retain cycle that resulted from capturing self in a closure
  * If an object owns a closure, and that closure owns self, then we have a retain cycle
  * This is why the compiler forces you to explicitly refer to self inside a closure
  * Sometimes you may want a closure to retain self, such as when you are waiting for a network callback and you don't want self to be deallocated before the callback
@@ -324,7 +336,7 @@ class TempNotifier {
     var changeNotifier: ((Int) -> Void)?
     var currentTemp = 72
     init() {
-        self.changeNotifier = { (temp: Int) in
+        self.changeNotifier = {(temp: Int) in
             self.currentTemp = temp
         }
     }
@@ -335,7 +347,8 @@ class TempNotifier {
  */
 
 // Here's the example from the debugging lecture again
-// Why is this a retain cycle?
+// Explain why this is a retain cycle?
+// Do: Fix this using weak self in a capture list
 
 class DetailVC:UIViewController {
     
