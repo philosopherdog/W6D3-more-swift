@@ -163,7 +163,10 @@ print(#line, r11)
  - These closures should probably take no inputs but just print out a message (it's up to you)
  - Write a forin loop and invoke each closure
  */
-
+let myClosureArray = [{print("hello")}, {print("Light")}, {print("House")}]
+for item in myClosureArray {
+    item()
+}
 /*:
  #### Why Closures?
  - If functions just are named closures, then why do we need closures at all?
@@ -215,7 +218,7 @@ foods.sort({ item1, item2 in item1 < item2 })
  So we can omit the list of arguments and also the `in` keyword:
  */
 
-foods.sort({ $0 < $1 })
+foods.sort({$0 < $1 })
 
 /*:
  Swift's String type actually defines the `>` and `<` as a function that takes 2 strings and returns a Bool depending on their order. So we can even omit the generated shorthand arguments!
@@ -248,6 +251,37 @@ foods.sort{
  ##### _Do:_
  Rewrite the view controller callback using a closure rather than a function from around line 53
  */
+class MasterViewController2:UIViewController {
+    var detailViewController: DetailViewController2!
+    
+    func fakeEventFired() {
+        detailViewController = DetailViewController2()
+        detailViewController.completionHandler = {(data:String)->Void  in
+            print(#line, "Master is printing data sent from detail: \(data)")
+        }
+    }
+}
+
+class DetailViewController2: UIViewController {
+    
+    typealias CallBack = (data:String)->(Void)
+    
+    var completionHandler:CallBack! // why is this implicitly unwrapped?
+    
+    func fakeButtonTap() {
+        // do some long running task
+        sleep(2)
+        // get some user input
+        let fakeUserData = "Pick up milk"
+        // call the function assigned to the completionHandler variable with data
+        completionHandler(data:fakeUserData)
+    }
+}
+
+//let masterViewController = MasterViewController()
+//masterViewController.fakeEventFired()
+//masterViewController.detailViewController?.fakeButtonTap()
+
 
 
 /*:
@@ -296,13 +330,32 @@ print(#line, myInnerFunc())
  ##### _Do:_
  Rewrite the last function using a closure, call the new function outerFunc3() & invoke it and the closure:
  */
+func outerFunc3() -> ( () -> Int ) {
+    var num = 10
+    return {()-> Int in
+        num += 20
+        return num
+    }
+}
+
+let outerFunc3Result = outerFunc3()
+outerFunc3Result()
 
 
 /*:
  ##### _Do:_
  Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the 20 pass in a value as a parameter to the closure
  */
+func outerFunc4() -> ( (num1:Int, num2:Int) -> Int ) {
+    var num = 10
+    return {(passedInInt: Int, passedInInt2:Int)-> Int in
+        num += passedInInt
+        return num
+    }
+}
 
+let outerFunc4Result = outerFunc4()
+outerFunc4Result(num1: 12, num2: 14)
 
 /*:
  ###### _Capture List_:
@@ -336,8 +389,11 @@ class TempNotifier {
     var changeNotifier: ((Int) -> Void)?
     var currentTemp = 72
     init() {
-        self.changeNotifier = {(temp: Int) in
-            self.currentTemp = temp
+        self.changeNotifier = {[weak self](temp: Int) in
+            guard let welf = self else {
+                return
+            }
+            welf.currentTemp = temp
         }
     }
 }
@@ -356,9 +412,12 @@ class DetailVC:UIViewController {
     var closure: Block!
 
     @IBAction func buttonTapped() {
-        closure = {
+        closure = { [weak self] in
             print("Some fake stuff")
-            self.fakeFunk()
+            guard let welf = self else {
+                return
+            }
+            welf.fakeFunk()
         }
         closure()
     }

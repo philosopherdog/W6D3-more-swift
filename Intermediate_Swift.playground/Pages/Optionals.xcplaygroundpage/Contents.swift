@@ -28,6 +28,11 @@ print(#line, result66)
  - write a conditional binding statement to unwrap result6 or result66
  */
 
+guard let result66 = result66 else {
+    fatalError()
+}
+
+print(#line, result66)
 
 /*: -------------------- */
 /*:
@@ -40,7 +45,7 @@ print(#line, result66)
  */
 
 var valueMustBeThere: Int? = Int("12")
-valueMustBeThere!
+//valueMustBeThere!
 
 
 /*:
@@ -50,10 +55,18 @@ valueMustBeThere!
  */
 
 // a) nil check
-
+if valueMustBeThere != nil {
+    print(#line, valueMustBeThere!)
+}
 // b) optional binding
-
+if let valueMustBeThere = valueMustBeThere {
+    print(#line, valueMustBeThere)
+}
 // c) guard
+
+guard let valueMustBeThere = valueMustBeThere else {
+    fatalError()
+}
 
 
 
@@ -63,7 +76,7 @@ valueMustBeThere!
 
 // 1. To avoid dealing with an initializer
 class MyViewController: UIViewController {
-    var myVar: String?
+    var myVar: String!
     override func viewDidLoad() {
         myVar = "something"
     }
