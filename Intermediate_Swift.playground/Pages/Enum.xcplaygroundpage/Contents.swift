@@ -39,7 +39,7 @@ class MyCoolController:UIViewController {
         case MasterViewController
         case DetailViewController
     }
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier! == SegueIdentifier.MasterViewController.rawValue {
         }
     }
@@ -83,7 +83,7 @@ enum WorkDay:Int {
 let thurs = 4
 //: Notice this rawValue initializer returns an optional as you would expect
 let workDay2 = WorkDay(rawValue: thurs)
-print(#line, workDay2)
+print(#line, workDay2!)
 
 let workDay = WorkDay.T
 print(#line, workDay.rawValue + 10)

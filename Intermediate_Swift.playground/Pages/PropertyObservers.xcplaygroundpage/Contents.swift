@@ -32,7 +32,7 @@ var todoArray:[ToDo] = [] {
     didSet {
         sleep(2)
         // oldValue is the default name given to old value
-        print("===>> didSet called", oldValue.last?.text)
+        print("===>> didSet called",  oldValue.last?.text)
     }
 /*
  // DON'T DO THIS -Krusty
