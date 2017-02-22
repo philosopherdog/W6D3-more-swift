@@ -3,9 +3,10 @@
     <pages>
         <page name='TableOfContents'/>
         <page name='Optionals'/>
-        <page name='Enum'/>
-        <page name='Tuples'/>
-        <page name='PropertyObservers'/>
         <page name='Closures'/>
+        <page name='PropertyObservers'/>
+        <page name='ErrorHandling'/>
+        <page name='Tuples'/>
+        <page name='Enum'/>
     </pages>
 </playground>
