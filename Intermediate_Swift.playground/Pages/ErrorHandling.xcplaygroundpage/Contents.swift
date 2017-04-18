@@ -8,7 +8,7 @@ enum NamingError:Error {
   case notTaylorSwift(String)
 }
 
-func fullName(from firstName:String, and lastName:String)throws -> String {
+func fullName(from firstName:String, and lastName:String) throws -> String {
   guard firstName != "Donald" && lastName != "Drumpf" else {
     throw NamingError.anyoneButTrump("Donald Trump NOT ALLOWED!")
   }
