@@ -17,6 +17,17 @@ import PlaygroundSupport
  * Optional Chaining.
  - - - - -
  */
+/*:
+### What are Optionals?
+- Optionals are used in situations where a value may be absent.
+- Eg. a Person class may have a LibraryCard property. Since some people don't have library cards we should model this as an optional.
+- Optionals have 2 possibilities: 1) there is a value and you can unwrap it to access the value, or 2) there isn't a value, it is `nil`, and unwrapping crashes the app.
+- In Swift you can only assign `nil` to a value that is marked as being an optional type.
+- So, if I plan on setting a variable to `nil` at any point in its life then it must be wrapped as an optional type.
+*/
+
+var opt1: String? = "hello"
+opt1 = nil
 
 /*:
  ##### **Question:**
@@ -31,45 +42,66 @@ let result6 = Int(numString) // Int() Attempts to Convert a String to Int but it
 print(#line, result6 as Any)
 
 /*:
+- Notice we can't do addition with `result6` because it is not an Int value but a boxed optional value.
+*/
+
+// let newResult6 = result6 + 10
+
+/*:
  ##### Unwrapping
- - Think of optionals like boxed objects.
- - If you force unwrap an optional that is nil Swift will crash.
- - There are numerous ways to unwrap optionals in Swift and how you do this is important to readability.
- - Forced unwrapping.
- - Optional binding.
- - Nil Coalescing.
- - Implicit unwrapping.
- - Optional Chaining.
+ - Think of optionals like boxed objects (just as you must unwrap NSNumber to do math with it, you must unbox optionals to do stuff with them).
+ - If you force unwrap an optional that is `nil` Swift will of course crash.
+ - There are numerous ways to unwrap optionals in Swift and how you do this is important to readability and if often a matter of coding style:
+    - Forced unwrapping.
+    - `nil` checking with forced unwrapping.
+    - Optional binding.
+    - `nil` Coalescing.
+    - Implicit unwrapping.
+    - Optional Chaining.
  */
 
 /*: -------------------- */
 /*:
  ##### **Forced UnWrap**
  - Everyone knows about forced unwrap.
- - Use it when you absolutely expect a value there and the app cannot continue without the value.
- - Helpful in development because you want your app to crash in development if something unexpected is happening.
- - But you will want to deal with missing data more gracefully in a production app!
+ - Use it when you **absolutely** expect a value to be there and the app cannot continue without the value.
+ - Can be helpful in development.
+ - But deal with missing data more gracefully in a production apps.
  - Avoid using forced unwrap just because you don't understand what's happening.
  */
 
 //Eg. Forced Unwrap
 let nummy = Int("12")
+print(#line, nummy as Any) // notice this prints the int wrapped
 nummy!
+
+/*: -------------------- */
+/*:
+ ##### **`nil` checking with forced unwrap**
+ - Generally avoid doing this.
+*/
+
+var dict1 = ["key1": 12]
+
+// Note: Attempts to access a dictionary always return an optional
+let val1 = dict1["key1"]
+if val1 != nil {
+  let result = val1! + 10 // we must unwrap it to do stuff
+  print(#line, result)
+}
 
 /*:
  ##### **Optional Binding**
- - There are 2 options:
  - `if let`
  - `guard let`
- - Use them when a nil value is possible.
+ - Use them when a `nil` value is possible and prefer them over forced unwrapping and nil checking.
+ - Use `guard let` if you want an early exit if a given value(s) is `nil`.
  */
 
 /*: -------------------- */
 /*:
  ##### **Optional Binding With _if_**
- - Convenient syntax for unwrapping optionals.
- - Optional binding statements can be chained to avoid "the pyramid of doom".
- */
+*/
 
 class LibraryCard {
   let number:Int
@@ -98,11 +130,13 @@ if let libCard = p1.libraryCard {
   print(#line, "this person has a library card number ", libCard.number)
 }
 
-// chaining binding and conditional expressions
+// chaining conditional binding expressions (prefer this)
 let newName = "fred"
-if let libCard = p1.libraryCard, let myFavNum = Int("42"), newName == "fred" {
+if let libCard = p1.libraryCard, let myFavNum = Int("42"), newName == "fred", libCard.number == 1234 {
   print(#line, libCard.number, myFavNum)
 }
+
+
 
 /*: -------------------- */
 /*:
@@ -117,7 +151,8 @@ if let libCard = p1.libraryCard, let myFavNum = Int("42"), newName == "fred" {
  
  ##### _Example:_
  */
-func isCatName(catName: String?) -> String {
+
+func catGreeting(with catName: String?) -> String {
   // nb. I'm making catName mutable, but remember it's a copy
   guard var catName = catName else {
     return "Cat name was nil!"
@@ -126,17 +161,24 @@ func isCatName(catName: String?) -> String {
   return catName
 }
 
-isCatName(catName: nil)
-isCatName(catName: "Tashi")
+var catName: String?
+
+var greetingResult = catGreeting(with: catName)
+print(#line, greetingResult)
+
+catName = "Tashi"
+greetingResult = catGreeting(with: catName)
+print(#line, greetingResult)
 
 
 // chaining
 
-guard let num1 = Int("44"), var num2 = Int("99") else {
+guard let num1 = Int("44"), var num2 = Int("99"), num1 == 44 else {
   fatalError()
 }
+
 num1
-num2+=1
+num2 += 1
 
 
 /*: -------------------- */
@@ -157,36 +199,21 @@ func testDefer(exit:Bool) {
 }
 
 testDefer(exit: false)
+// testDefer(exit: true)
 
-/*: -------------------- */
-/*:
- ##### _Do:_
- Rewrite `isCatName(_:)` as `isCatName2(_:)` using the nil coalescing operator instead of guard
- */
-
-//func isCatName2(catName: String?) -> String {
-//  // nb. I'm making catName mutable, but remember it's a copy
-//  guard var catName = catName else {
-//    return "Cat name was nil!"
-//  }
-//  catName += " meow"
-//  return catName
-//}
-//
-//isCatName2(catName: nil)
-//isCatName2(catName: "Tashi")
 
 /*: -------------------- */
 /*:
  ##### **Nil Coalescing Operator:**
- - Unwraps an optional and if nil it provides a default value
- - Looks a bit like the ternary operator
+ - Unwraps an optional.
+ - If the value is `nil` it provides a default value.
+ - Looks a bit like the ternary operator.
  */
 /*:
  ###### _Example 1:_
  */
 
-var age2: Int?
+var age2: Int? // optionals default to nil
 let unwrappedAge = age2 ?? 12
 
 /*:
@@ -196,59 +223,57 @@ let unwrappedAge = age2 ?? 12
 var name: String?
 
 //: Nil Coalescing Replaces 2 more verbose techniques
-//: First Long way using basic ternary operator & nil checking
+//: First Long way using nil checking.
+var result1b: String = ""
+
+if name == nil {
+  result1b = "Fat Freddy"
+} else {
+  result1b = name!
+}
+
+//: Here it using using the ternary operator
 let result1 = name != nil ? name! : "Fat Freddy"
-//: Nil coalescing (Sweet)
+
+//: Here it is using `nil coalescing` (Sweet!)
+//: Notice how `nil coalescing` does an implicit nil check.
+
 let result7 = name ?? "Slim Freddy"
 
-
-//: Long way using optional binding
-var result8 = ""
-if let name = name {
-  // name is unwrapped
-  result8 = name
-} else {
-  // default value assigned if name is nil
-  result8 = "Slow Freddy"
-}
-result8
-
-/*:
- ###### _Example 2:_
- */
-var age: Int? = 20
-
-// ternary version
-let result3 = age != nil ? age! : 30
-//: - Notice nil coalescing does implicit nil checking (try removing != nil from the ternary operator).
-//: - Nil coalsecing implicitly uses the unwrapped optional if not nil.
-// nil coalescing version
-let result4 = age ?? 40
-
 /*: -------------------- */
+
+// let's assign something to name
+name = "Foxleg"
+
 /*:
  ##### _Do:_
- - rewrite the forced unwrap (below) using:
- - a) a basic nil check.
- - b) optional binding with if.
- - c) optional binding with guard.
- - d) nil coalescing.
- > Comment out the forced unwrap version line 84. Also, use fatalError() in the else condition of guard instead of return).
- */
+ - 1. re-write `let result7 = name ?? "Slim Freddy"` using:
+    - a) optional binding with both `if`
+    - b) optional binding with both `guard`
+ - 2. Attempt to unwrap this expression `var age: Int? = 20` using:
+    - a) basic `nil` check
+    - b) optional binding using `if`
+    - c) optional binding using `guard`
+    - c) `nil coalscing` and assign 10 as the default
+  - 3. re-write `catGreeting(with:)` using the `nil coalescing` operator.
+*/
 
-var valueMustBeThere: Int? = 12
-valueMustBeThere!
+// 1.
+// a) if let:
 
-// a) nil check:
+// b) guard let:
 
-
-// b) optional binding using if:
-
-
-// c) optional binding using guard:
+// 2.
+// a) `nil` check:
 
 
-// d) nil coalescing:
+// b) optional binding using `if`:
+
+
+// c) optional binding using `guard`:
+
+
+// d) `nil coalescing` with 10 as default:
 
 
 /*: -------------------- */
@@ -268,6 +293,7 @@ class MyViewController: UIViewController {
     super.viewDidLoad()
     print(#line, #function, "fired!")
     let imageView = UIImageView()
+    view.addSubview(imageView)
     imageView.image = photoObject.image
   }
 }
@@ -277,35 +303,29 @@ myVC.photoObject = PhotoObject(image: UIImage())
 // you have to call view to force viewDidLoad to fire
 myVC.view.backgroundColor = UIColor.red
 
-/*:
- #### _Questions:_
- * Why would you use an implicitly unwrapped optional in MyViewController?
- * What are the advantages/disadvantages of these 5 versions of unwrapping? Which should you prefer and why?
- */
-
 /*: -------------------- */
 /*:
  ##### **Optional Casting**
  Notice: Upcasting is _implicit_!
  */
 
-//: Example of implicit upcasting
+//: Example of `implicit upcasting`
+
 var vanillaCell: UITableViewCell?
 
-class MyCell: UITableViewCell {
-}
+class MyCell: UITableViewCell {}
 
 let myCell = MyCell()
-myCell.textLabel?.text = "My Dumb Label"
-myCell
+myCell.textLabel?.text = "pick up fruit"
+myCell.textLabel?.text
 
 //: I'm upcasting here (Look ma no _as_).
 // Notice I don't need to:
 // vanillaCell = myCell as UITableViewCell
-// This is because the compiler knows that the type of MyCell is a subclass of UITableViewCell so it is-a UITableViewCell.
+// This is because the compiler knows that the type of MyCell is a subclass of UITableViewCell so it Is-A UITableViewCell. I explictly told it this by making MyCell a subclass of UITableViewCell.
 
 vanillaCell = myCell
-print(#line, (vanillaCell?.textLabel?.text)!) // this is optional chaining, more on this below.
+print(#line, (vanillaCell?.textLabel?.text)!) // this is optional chaining, more on this below. For now notice that each element in this chain is an optional.
 
 /*: -------------------- */
 class Mammal {}
@@ -324,10 +344,10 @@ if person3 is Mammal {
 }
 
 //: Because Person3 was cast to an AnyObject the compiler cannot infer its underlying type at compile time.
-//: So if we try to _downcast_ person3 to it's underlying type Person3 we can't just use _as_ since this could fail.
-//: So, we must indicate that this cast could fail using either the "?" called an "optional cast" or "!" which is an "forced downcast".
-//: Just like forced unwrapping Swift will crash if you attempt to force downcast to an underlying type that isn't the case.
-//: If you do an optional cast then you must still unwrap the result.
+//: So if we try to _downcast_ person3 to it's underlying type Person3 we can't just use _as_ since we could be mistaken and this could fail.
+//: So, we must indicate that this cast could fail using either the "?" called an "optional downcast" or "!" which is an "forced downcast".
+//: Just like forced unwrapping Swift will crash if you attempt to force downcast to an underlying type that turns out to be mistaken.
+//: If you do an optional cast then you must still unwrap the result, but it prevents a crash if you make a mistake.
 
 let optionalDownCastP3 = person3 as? Person3
 let forcedDownCastP3 = person3 as! Mammal
@@ -339,7 +359,7 @@ let forcedDownCastP3 = person3 as! Mammal
 
 let p4 = person3 as? Dog // if we forced downcast this would crash
 
-p4 //: p3 is _not_ of type Dog
+p4 //: p4 is _not_ of type Dog!
 
 /*: -------------------- */
 /*:
@@ -367,6 +387,7 @@ let p10 = Person4(name: "fred")
  - The whole expression evalutes to an optional. So, you still have to unwrap the whole expression.
  - It allows a nested optional expression to fail anywhere along the unwrapping.
  - If it does fail to have a value anywhere along the expression the whole expression evaluates to an optional containing nil.
+ - If each optional has a value then the whole expression evalutes to an optional containing a value.
  */
 
 /*: -------------------- */
@@ -374,15 +395,6 @@ let p10 = Person4(name: "fred")
  #### **Optional Chaining First Example**
  */
 class Borked {
-  private var b:String?
-  internal var inner:InnerBorked?
-  init?(b:String?) {
-    guard b != nil else {
-      return nil
-    }
-    self.b = b
-    self.inner = InnerBorked(c: self.b)
-  }
   class InnerBorked {
     var c: String?
     init?(c:String?) {
@@ -392,6 +404,16 @@ class Borked {
       self.c = c
     }
   }
+  private var b:String?
+  internal var inner:InnerBorked?
+  init?(b:String?) {
+    guard b != nil else {
+      return nil
+    }
+    self.b = b
+    self.inner = InnerBorked(c: self.b)
+  }
+  
 }
 
 let borked = Borked(b: "something")
@@ -406,21 +428,36 @@ if let inner = inner {
  */
 class LibraryCard2 {
   let number: Int?
-  // library cards have no number if they are expired
+  // library cards have no number if they are expired. It's POLICY man.
   init(number:Int?) {
     self.number = number
   }
 }
 
+extension LibraryCard2: Equatable {
+  public static func ==(lhs: LibraryCard2, rhs: LibraryCard2) -> Bool {
+    return lhs.number == rhs.number
+  }
+}
+
 class Citizen {
   // not every citize has a libraryCard
-  var libraryCard: LibraryCard2?
-  init?() {}
+  private let _blackListedCards:[LibraryCard2] = []
+  internal var libraryCard: LibraryCard2?
+  init?(libraryCard: LibraryCard2?) {
+    if libraryCard != nil {
+      let blackListCount = _blackListedCards.filter{ $0 == libraryCard }.count
+      if blackListCount > 0 {
+        return nil
+      }
+    }
+    self.libraryCard = libraryCard
+  }
 }
 
 
 
-let citizen = Citizen()
+let citizen = Citizen(libraryCard: nil)
 let libraryCardNot = citizen?.libraryCard?.number
 
 libraryCardNot // nil
@@ -428,10 +465,10 @@ libraryCardNot // nil
 // Creating another one
 let libraryCard = LibraryCard2(number: 12)
 
-let citizen2 = Citizen()
+let citizen2 = Citizen(libraryCard: libraryCard)
 citizen2?.libraryCard = libraryCard
 let number = citizen2?.libraryCard?.number // NOTICE number is still an OPTIONAL with optional chaining even though citizen2, libraryCard and number all have values
-let unwrappedNumber = number!
+let unwrappedNumber = number ?? -1
 
 //: Why do we need optional chaining!?
 //: citizen2.libraryCard?.number replaces the following mess!
@@ -450,34 +487,6 @@ if citizen2 != nil {
   result9 = nil
 }
 
-print(result9 ?? "nil ist here")
-
-// same thing with guard
-
-guard let citizen2 = citizen2, let libraryCard = citizen2.libraryCard  else {
-  fatalError()
-}
-
-citizen2.libraryCard?.number
-
-// here it is using optional binding.
-
-//if let citizen2 = citizen2 {
-//    if let libraryCard = citizen2.libraryCard {
-//    print(libraryCard.number)
-//    }
-//}
-//
-//// I can also drop the nesting and do it inline
-//if let citizen2 = citizen2, libraryCard = citizen2.libraryCard {
-//    print(libraryCard.number)
-//}
-
-
-/*:
- ##### _Do On Your Own:_
- - vanillaCell?.textLabel?.text above is optional chaining.
- - Write this statement out long hand using != nil for each element and print the unwrapped text value. Do it using guard let and if let as well.
- */
+result9 ?? -1
 
 
