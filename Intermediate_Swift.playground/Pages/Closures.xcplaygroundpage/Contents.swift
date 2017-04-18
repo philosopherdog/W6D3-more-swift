@@ -8,7 +8,7 @@ PlaygroundPage.current.needsIndefiniteExecution = true
 /*:
  ### **Named Closures (AKA Functions)**
  - "Closures are self-contained blocks of functionality that can be passed around and used in your code"
- - By this definition ordinary functions in Swift are closures!
+ - By this definition ordinary functions in Swift are closures too!
  - Closures/Functions can also capture value from outside their scope (More on this below)
  - Closures/Functions are known as _first class citizens_. What does this mean?
  */
@@ -21,32 +21,31 @@ func myFunc() {
   print(#line, "Function passed to another function executed")
 }
 
-let functionConstant = myFunc // assigning a function to a let/var (notice the "()" brackets are ommitted because we are not executing it)
+let function = myFunc // assigning a function to a let/var (notice the "()" brackets are ommitted because we are not executing it)
 
-func funkyFunc(f:(Void)-> Void) {
+func myFunction(f:(Void)-> Void) {
   print(#line, #function, " is executing")
   f()
 }
 
 // alernative syntax.
-func funkyFunc1(f:()->()) {}
-func funkyFunc11(f:(Void)->()){}
-func funkyFunc111(f:()->(Void)){}
+func myFunctionAlt1(f:()->()) {}
+func myFunctionAlt2(f:(Void)->()){}
+func myFunctionAlt3(f:()->(Void)){}
 
-funkyFunc(f: myFunc)
+myFunction(f: function)
 
-funkyFunc(f:functionConstant)
 /*:
  Using typealias for readability
  */
 typealias SimpleFuncType = ()->()
 
-func funkyFunc2(f:SimpleFuncType) {
+func function2(f:SimpleFuncType) {
   print(#line, #function, " is executing")
   f()
 }
 
-funkyFunc2(f:myFunc)
+function2(f:function)
 
 /*:
  ##### Function Internal/External Parameters
@@ -68,33 +67,45 @@ func myFullNameWith(_ firstName:String, _ lastName:String)-> String {
 myFullNameWith(firstName, lastName)
 
 /*:
+* Suppressing the first external parameter in Swift is used for Objc interoperability.
+
+- (void)doStuffWithStuff:(Stuff *)stuff andOtherStuff:(OtherStuff *)other;
+
+[obj doStuffWithStuff: stuff andOtherStuff: otherStuff];
+
+func doStuff(with stuff:Stuff, and otherStuff:OtherStuff)
+obj.doStuff(with: stuff, and: otherStuff)
+*/
+
+/*:
  ##### Using Functions in CallBacks
- - Plain functions (or closures) can be passed to another object to be used as a callback or completion handler
+ - Plain functions (or closures) can be passed to another object to be used as a callback or completion handler.
  - Apple uses this in all modern parts of the SDK as an alternative or adjunct to delegation!
  - Can you pass a function to a method in Objc?
- */
-class MasterViewController:UIViewController {
-  var detailViewController: DetailViewController! // why is this an implicitly unwrapped optional?
+*/
+ 
+class MasterViewController: UIViewController {
   
-  func fakeEventFired() {
+  var detailViewController: DetailViewController!
+  
+  func fakeEventDidFire() {
+    
+    func completionHandler(with data:String)-> Void {
+      print(#line, #function, "Master is printing data sent from detail: \(data)")
+    }
+    
     detailViewController = DetailViewController()
     detailViewController.completionHandler = completionHandler
     self.present(detailViewController, animated: false, completion: nil)
   }
 }
 
-// optionally put the function in an extension
-extension MasterViewController {
-  func completionHandler(with data:String)->Void {
-    print(#line, #function, " Master is printing data sent from detail: \(data)")
-  }
-}
 
 class DetailViewController: UIViewController {
   
   typealias CallBack = (String)->(Void)
   
-  var completionHandler:CallBack! // why is this implicitly unwrapped?
+  var completionHandler:CallBack! // assigned in fakeEventDidFire on MVC
   
   func fakeButtonTap() {
     // do some long running task
@@ -108,8 +119,8 @@ class DetailViewController: UIViewController {
 }
 
 let masterViewController = MasterViewController()
-masterViewController.fakeEventFired()
-masterViewController.detailViewController?.fakeButtonTap()
+masterViewController.fakeEventDidFire() // this creates DVC and assigns the completion handler
+masterViewController.detailViewController?.fakeButtonTap() // this calls the completion handler
 
 /*:
  ##### **Unnamed Functions AKA CLOSURES**
@@ -133,13 +144,16 @@ let close1 = { print(#line, "hello closure!") }
 close1() // call it using the assigned constant
 
 // closeObjc()
+
 /*:
  passing a closure to a function
  */
+
 func f1(with close:()->()) {
   close()
 }
 
+// notice no ()
 f1(with: close1)
 
 /*:
@@ -161,7 +175,7 @@ f1{
  closure with a String parameter and no return value
  */
 let close2 = {
-  // notice that the String type can be inferred so it is optional
+  // notice that the String type declaration can be inferred; so it is optional.
   (str: String) -> Void in
   print(#line, str)
 }
@@ -186,6 +200,8 @@ let r11 = {
   return num1 * num2
 }(someNum, someOtherNum)
 
+// r11 captures the result which is automatically called.
+
 print(#line, r11)
 
 let r134 = {
@@ -193,6 +209,7 @@ let r134 = {
   return num1 * num2
 }
 
+// r134 captures 
 let result = r134(12, 10)
 
 /*:
@@ -344,7 +361,7 @@ masterViewController2.detailViewController?.fakeButtonTap()
 
 /*:
  ##### **Capturing Values**
- - Closures can capture constants/variables from their surrounding scope. (So can functions.
+ - Closures can capture constants/variables from their surrounding scope. (So can functions).
  - Closures can use and even mutate these captured values
  - Remember functions can be nested in Swift, as can classes, enums, and structs.
  - Nested functions can use and mutate values from the surrounding scope. Remember functions are just named closures.
@@ -365,7 +382,7 @@ outerFunc() // Can someone walk us through this code?
 
 /*:
  Instead of executing the inner function internally, let's return it:
- */
+*/
 
 func outerFunc2() -> ( () -> Int ) {
   var num = 10
@@ -418,7 +435,7 @@ theInnerFunc2()
 /*:
  ###### _Capture List_:
  - Notice that nested functions & closures capture value by reference.
- - This means that the values capture can be mutated (as long as they are vars), which might not be what you want (Question: do Objc blocks capture by reference or value?).
+ - This means that the values captured can be mutated (as long as they are vars), which might not be what you want (Question: do Objc blocks capture by reference or value?).
  - In Swift you can use something called a _capture list_ to "turn off capture by reference".
  */
 
@@ -426,12 +443,17 @@ theInnerFunc2()
 // Make sure you totally understand what's going on here.
 
 var z = 10
-let close5 = { print(#line, "~~~>", z)}
+let close5 = {
+  print(#line, "~~~>", z)
+}
 z += 20
 close5()
 
 var y = 10
-let close4 = {[y] in print(#line, "==>", y)}
+let close4 = {
+  [y] in
+  print(#line, "==>", y)
+}
 y += 20
 
 close4()
@@ -452,7 +474,7 @@ class TempNotifier {
       guard let welf = self else {
         return
       }
-      // if self were not weak it would increase the retain count of this instance by 1
+      // if self were not weak it would increase the retain count of this instance by 1 because this closure captures self and self catures this closure.
       welf.currentTemp = temp
     }
   }
@@ -469,32 +491,6 @@ tempNotifier.someEvent()
 /*:
  * Difference between `[unowned self]` and `[weak self]` is that if unowned self is nil the app will crash. weak self gives you the chance of handling the case where self is possibly nil.
  */
-
-// Explain why this is a retain cycle?
-// Do: Fix this using weak self in a capture list
-
-class DetailVC:UIViewController {
-  
-  private typealias Block = () -> Void
-  private var closure: Block!
-  
-  internal func buttonTapped() {
-    closure = {
-      print(#line, "Some fake stuff")
-      self.fakeFunk()
-    }
-    sleep(1)
-    closure()
-  }
-  
-  private func fakeFunk() {
-    print(#line, "fake funk")
-  }
-}
-
-let detailVC = DetailVC()
-detailVC.buttonTapped()
-
 
 /*:
  ##### **Higher Order Functions**
