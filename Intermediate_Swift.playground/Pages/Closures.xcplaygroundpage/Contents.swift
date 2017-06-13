@@ -51,13 +51,14 @@ function2(f:function)
  ##### Function Internal/External Parameters
  */
 
-func makeFullName(with firstName:String, and lastName:String)-> String {
+func makeFullName(_ firstName:String, _ lastName:String)-> String {
   return firstName + " " + lastName
 }
 
 let firstName = "Fred"
 let lastName = "FlintStone"
-makeFullName(with:firstName, and:lastName)
+
+makeFullName(firstName, lastName)
 
 // suppressing external param names (Don't do it like this).
 func myFullNameWith(_ firstName:String, _ lastName:String)-> String {
@@ -90,12 +91,14 @@ class MasterViewController: UIViewController {
   
   func fakeEventDidFire() {
     
-    func completionHandler(with data:String)-> Void {
-      print(#line, #function, "Master is printing data sent from detail: \(data)")
-    }
+//    func completionHandler(with data:String)-> Void {
+//      print(#line, #function, "Master is printing data sent from detail: \(data)")
+//    }
     
     detailViewController = DetailViewController()
-    detailViewController.completionHandler = completionHandler
+    detailViewController.completionHandler = {(data:String)-> Void in
+      print(#line, #function, "Master is printing data sent from detail: \(data)")
+    }
     self.present(detailViewController, animated: false, completion: nil)
   }
 }
@@ -134,7 +137,7 @@ _ = {
 
 
 // Assigning a simple closure to a constant
-let close1 = { print(#line, "hello closure!") }
+let close1:(Void)->(Void) = { print(#line, "hello closure!") }
 
 /*
  Compared to objc
@@ -176,7 +179,7 @@ f1{
  */
 let close2 = {
   // notice that the String type declaration can be inferred; so it is optional.
-  (str: String) -> Void in
+  (str) in
   print(#line, str)
 }
 /*:
@@ -218,7 +221,10 @@ let result = r134(12, 10)
  - These closures should probably not take inputs but just print out a message (it's up to you)
  - Write a forin loop and invoke each closure
  */
-
+let aaa = [{ print("Hello") }, {print("world") }]
+for a in aaa {
+  a()
+}
 
 /*:
  #### Why Closures?
@@ -255,7 +261,7 @@ print(#line, r222)
  ##### _Do:_
  * Write the sort function above using trailing closure syntax
  */
-
+let r2222 = foods.sorted{ (item1, item2) in item1 < item2}
 /*:
  - Closure expressions that are passed inline to a function parameter can be greatly simplified because the compiler can infer its type.
  - The `sorted(by:)` function expects a closure that has 2 parameters of the same type that can be compared, and it returns a Bool.
@@ -290,7 +296,7 @@ foods2
 /*:
  Swift's String type actually defines the `>` and `<` as a function that takes 2 strings and returns a Bool depending on their order. So we can even omit the generated shorthand arguments!
  */
-foods2.sort(by:<)
+foods2.sort(by:>)
 foods2
 
 
@@ -408,12 +414,11 @@ print(#line, theInnerFunc())
  */
 func outerFunc3() -> ( () -> Int ) {
   var num = 10
-  func innerFunc()-> Int {
+  return  {()-> Int in
     // num is captured
     num += 20
     return num
   }
-  return innerFunc
 }
 
 let theInnerFunc2 = outerFunc3()
@@ -424,13 +429,17 @@ theInnerFunc2()
  ##### _Do:_
  Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the 20 pass in a value as a parameter to the closure
  */
-//func outerFunc4() -> ( (Int) -> Int ) {
-//  var num = 10
-//  return {}
-//}
+func outerFunc4() -> ( (Int) -> Int ) {
+  var num = 10
+  return  {(num2: Int)-> Int in
+    // num is captured
+    num += num2
+    return num
+  }
+}
 
-//let outerFunc4Result = outerFunc4()
-//outerFunc4Result(12)
+let outerFunc4Result = outerFunc4()
+outerFunc4Result(12)
 
 /*:
  ###### _Capture List_:
