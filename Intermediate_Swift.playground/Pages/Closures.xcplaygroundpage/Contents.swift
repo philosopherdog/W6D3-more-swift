@@ -526,7 +526,7 @@ print(#line, result2)
  Here's map using terser syntax:
  */
 
-let result22 = arr1.map{"\($0 + 10)"}
+let result22 = arr1.map{"\(he + 10)"}
 print(#line, result22)
 
 /*:
