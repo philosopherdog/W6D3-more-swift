@@ -17,30 +17,35 @@ PlaygroundPage.current.needsIndefiniteExecution = true
  ##### _Example of Function Passed as Parameter_
  */
 
-func myFunc() {
+func innerFunc() {
   print(#line, "Function passed to another function executed")
 }
 
-let function = myFunc // assigning a function to a let/var (notice the "()" brackets are ommitted because we are not executing it)
+let function = innerFunc // assigning a function to a let/var (notice the "()" brackets are ommitted because we are not executing it.)
 
-func myFunction(f:(Void)-> Void) {
+func function1(f:(Void)-> Void) {
   print(#line, #function, " is executing")
   f()
 }
 
-// alernative syntax.
+// Alernative syntax. We can omit the word Void if we wish.
 func myFunctionAlt1(f:()->()) {}
 func myFunctionAlt2(f:(Void)->()){}
 func myFunctionAlt3(f:()->(Void)){}
 
-myFunction(f: function)
+// Calling myFunction with a function passed in. Notice no () because we're not executing it.
+
+function1(f: function)
+
+function1(f: innerFunc)
 
 /*:
  Using typealias for readability
  */
+
 typealias SimpleFuncType = ()->()
 
-func function2(f:SimpleFuncType) {
+func function2(f: SimpleFuncType) {
   print(#line, #function, " is executing")
   f()
 }
@@ -51,7 +56,9 @@ function2(f:function)
  ##### Function Internal/External Parameters
  */
 
-func makeFullName(_ firstName:String, _ lastName:String)-> String {
+// Suppressing the external parameter
+
+func makeFullName(_ firstName: String, _ lastName: String)-> String {
   return firstName + " " + lastName
 }
 
@@ -60,70 +67,28 @@ let lastName = "FlintStone"
 
 makeFullName(firstName, lastName)
 
-// suppressing external param names (Don't do it like this).
-func myFullNameWith(_ firstName:String, _ lastName:String)-> String {
-  return firstName + " " + lastName
-}
-
-myFullNameWith(firstName, lastName)
 
 /*:
-* Suppressing the first external parameter in Swift is used for Objc interoperability.
-
-- (void)doStuffWithStuff:(Stuff *)stuff andOtherStuff:(OtherStuff *)other;
-
-[obj doStuffWithStuff: stuff andOtherStuff: otherStuff];
-
-func doStuff(with stuff:Stuff, and otherStuff:OtherStuff)
-obj.doStuff(with: stuff, and: otherStuff)
-*/
-
-/*:
- ##### Using Functions in CallBacks
- - Plain functions (or closures) can be passed to another object to be used as a callback or completion handler.
- - Apple uses this in all modern parts of the SDK as an alternative or adjunct to delegation!
- - Can you pass a function to a method in Objc?
-*/
+ * Suppressing the first external parameter in Swift is used for Objc interoperability.
  
-class MasterViewController: UIViewController {
-  
-  var detailViewController: DetailViewController!
-  
-  func fakeEventDidFire() {
-    
-//    func completionHandler(with data:String)-> Void {
-//      print(#line, #function, "Master is printing data sent from detail: \(data)")
-//    }
-    
-    detailViewController = DetailViewController()
-    detailViewController.completionHandler = {(data:String)-> Void in
-      print(#line, #function, "Master is printing data sent from detail: \(data)")
-    }
-    self.present(detailViewController, animated: false, completion: nil)
-  }
+ - (void)doStuffWithStuff:(Stuff *)stuff andOtherStuff:(OtherStuff *)other;
+ 
+ [obj doStuffWithStuff: stuff andOtherStuff: otherStuff];
+ 
+ func doStuff(with stuff: Stuff, and otherStuff: OtherStuff)
+ 
+ obj.doStuff(with: stuff, and: otherStuff)
+ */
+
+// Notice how splitting the name imposes a naming convention on the consumer!
+
+func insertObject(at indexPath: NSIndexPath) {
+  print(#line, indexPath)
 }
 
+let indexPath = NSIndexPath(row: 0, section: 2)
+insertObject(at: indexPath)
 
-class DetailViewController: UIViewController {
-  
-  typealias CallBack = (String)->(Void)
-  
-  var completionHandler:CallBack! // assigned in fakeEventDidFire on MVC
-  
-  func fakeButtonTap() {
-    // do some long running task
-    sleep(2)
-    // get some user input
-    let fakeUserData = "Pick up milk"
-    // call the function assigned to the completionHandler variable with data
-    completionHandler(fakeUserData)
-    //        completionHandler(data:fakeUserData)
-  }
-}
-
-let masterViewController = MasterViewController()
-masterViewController.fakeEventDidFire() // this creates DVC and assigns the completion handler
-masterViewController.detailViewController?.fakeButtonTap() // this calls the completion handler
 
 /*:
  ##### **Unnamed Functions AKA CLOSURES**
@@ -212,15 +177,101 @@ let r134 = {
   return num1 * num2
 }
 
-// r134 captures 
+// r134 captures
 let result = r134(12, 10)
+
+
+/*:
+ ##### Using Functions in CallBacks
+ - Plain functions (or closures) can be passed to another object to be used as a callback or completion handler.
+ - Apple uses this in all modern parts of the SDK as an alternative or adjunct to delegation!
+ - Can you pass a function to a method in Objc?
+ */
+
+class Photo {}
+
+class MainVC: UIViewController {
+  
+  var photos = [Photo]() {
+    didSet {
+      // reload table
+      print(#line, "object was added")
+    }
+  }
+  
+  // func is called by DVC
+  func block(photo:Photo) {
+    self.photos.append(photo)
+  }
+  
+  let dvc = DVC()
+  
+  func prepare() {
+    dvc.block = block(photo:)
+  }
+}
+
+class DVC: UIViewController {
+  
+  var block:((Photo)->())!
+  
+  func save() {
+    let photo = Photo()
+    self.block(photo)
+  }
+}
+
+let mainVC = MainVC()
+mainVC.prepare()
+mainVC.dvc.save()
+
 
 /*:
  ##### _Do:_
- - Add a few simple closures to an array
- - These closures should probably not take inputs but just print out a message (it's up to you)
- - Write a forin loop and invoke each closure
+ * Re-write the above and instead of creating a separate function create a closure.
  */
+
+class MainVC2: UIViewController {
+  
+  var photos = [Photo]() {
+    didSet {
+      // reload table
+      print(#line, "object was added")
+    }
+  }
+  
+  // func is called by DVC
+  func block(photo:Photo) {
+    self.photos.append(photo)
+  }
+  
+  let dvc = DVC()
+  
+  func prepare() {
+    dvc.block = block(photo:)
+  }
+}
+
+class DVC2: UIViewController {
+  
+  var block:((Photo)->())!
+  
+  func save() {
+    let photo = Photo()
+    self.block(photo)
+  }
+}
+
+/*:
+ ##### _Do:_
+ * Refactor the same method and pass the block straight into the save method instead of saving it as a property.
+ */
+
+
+
+
+// Adding Closures to an array
+
 let aaa = [{ print("Hello") }, {print("world") }]
 for a in aaa {
   a()
@@ -230,14 +281,16 @@ for a in aaa {
  #### Why Closures?
  - If functions just are named closures, then why do we need closures at all?
  - Closures are simply a convenience.
- - Sometimes, especially when we want to pass a function as an argument, we don't want to create a function separately and pass the name of the function. It's much more readable and convenient to pass everything inline if we don't
- - Let's look at Swift's sort(_:) function that expects a function/closure like this.
+ - Sometimes, especially when we want to pass a function as an argument, we don't want to create a function separately and pass the name of the function. It's much more readable and convenient to pass everything inline if we don't.
+ - Let's look at Swift's sort(_:) function that expects a function/closure and see the difference.
  */
 
 let foods = ["zuccini", "banana", "avacado", "lettuce", "walnut", "tahini", "bread"]
+
 /*:
  Doing it with a function:
  */
+
 func sorter1(item1: String, item2: String) -> Bool {
   return item1 < item2
 }
@@ -258,15 +311,16 @@ let r222 = foods.sorted(by: { (item1:String, item2:String) -> Bool in
 print(#line, r222)
 
 /*:
- ##### _Do:_
- * Write the sort function above using trailing closure syntax
+ * We can make this code more readable. Lets re-write the sort function above using trailing closure syntax.
  */
+
 let r2222 = foods.sorted{ (item1, item2) in item1 < item2}
+
 /*:
  - Closure expressions that are passed inline to a function parameter can be greatly simplified because the compiler can infer its type.
  - The `sorted(by:)` function expects a closure that has 2 parameters of the same type that can be compared, and it returns a Bool.
  - Based on this, the compiler can infer the closure type.
- - So, we don't need to explicitly specify the parameter types and the return type.
+ - So, we don't need to specify the parameter types and the return type.
  */
 
 var foods2 = ["zuccini", "banana", "avacado", "lettuce", "walnut", "tahini", "bread"]
@@ -285,9 +339,8 @@ foods2.sort(by:{ item1, item2 in item1 > item2 })
 foods2
 
 /*:
- Swift automatically generates shorthand argument names for inline closures: $0, $1, $2, etc.
- 
- So we can omit the list of arguments and also the `in` keyword:
+ * Swift automatically generates shorthand argument names for inline closures: $0, $1, $2, etc.
+ * So we can omit the list of arguments and also the `in` keyword:
  */
 
 foods2.sort{$0 > $1}
@@ -296,15 +349,15 @@ foods2
 /*:
  Swift's String type actually defines the `>` and `<` as a function that takes 2 strings and returns a Bool depending on their order. So we can even omit the generated shorthand arguments!
  */
+
 foods2.sort(by:>)
 foods2
 
 
 /*:
  ###### _Trailing Closure Syntax_
- If a closure is the last argument of a function you can move it out of the function's round parentheses
- 
- Here's the long version of `sort(_:)` again using trailing closure syntax
+ * If a closure is the last argument of a function you can move it out of the function's round parentheses, as we've seen.
+ * Here's the long version of `sort(_:)` again using trailing closure syntax
  */
 
 foods2.sort(){
@@ -322,53 +375,9 @@ foods2.sort{
 }
 
 /*:
- ##### _Do:_
- Rewrite the view controller callback using a closure rather than a function from around line 53
- */
-class MasterViewController2:UIViewController {
-  var detailViewController: DetailViewController2! // why is this an implicitly unwrapped optional?
-  
-  func fakeEventFired() {
-    detailViewController = DetailViewController2()
-    detailViewController.completionHandler = completionHandler
-    self.present(detailViewController, animated: false, completion: nil)
-  }
-}
-
-// optionally put the function in an extension
-extension MasterViewController2 {
-  func completionHandler(with data:String)->Void {
-    print(#line, #function, " Master is printing data sent from detail: \(data)")
-  }
-}
-
-class DetailViewController2: UIViewController {
-  
-  typealias CallBack = (String)->(Void)
-  
-  var completionHandler:CallBack! // why is this implicitly unwrapped?
-  
-  func fakeButtonTap() {
-    // do some long running task
-    sleep(2)
-    // get some user input
-    let fakeUserData = "Pick up milk"
-    // call the function assigned to the completionHandler variable with data
-    completionHandler(fakeUserData)
-    //        completionHandler(data:fakeUserData)
-  }
-}
-
-let masterViewController2 = MasterViewController2()
-masterViewController2.fakeEventFired()
-masterViewController2.detailViewController?.fakeButtonTap()
-
-
-
-/*:
  ##### **Capturing Values**
  - Closures can capture constants/variables from their surrounding scope. (So can functions).
- - Closures can use and even mutate these captured values
+ - Closures can use and even mutate these captured values.
  - Remember functions can be nested in Swift, as can classes, enums, and structs.
  - Nested functions can use and mutate values from the surrounding scope. Remember functions are just named closures.
  - Closures inside functions have the same behaviour as nested functions.
@@ -387,8 +396,8 @@ func outerFunc() {
 outerFunc() // Can someone walk us through this code?
 
 /*:
- Instead of executing the inner function internally, let's return it:
-*/
+ Instead of executing the inner function internally, let's return it so we can execute the returned function.
+ */
 
 func outerFunc2() -> ( () -> Int ) {
   var num = 10
@@ -410,42 +419,42 @@ print(#line, theInnerFunc())
 
 /*:
  ##### _Do:_
- Rewrite the last function using a closure, call the new function outerFunc3() & invoke it and the closure:
+ Rewrite the last function using a closure & invoke it and the closure:
  */
+
 func outerFunc3() -> ( () -> Int ) {
   var num = 10
-  return  {()-> Int in
+  func innerFunc()-> Int {
     // num is captured
     num += 20
     return num
   }
+  return innerFunc
 }
-
-let theInnerFunc2 = outerFunc3()
-theInnerFunc2()
 
 
 /*:
  ##### _Do:_
- Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the 20 pass in a value as a parameter to the closure
+ Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the 20, pass in a value as a parameter to the closure
  */
-func outerFunc4() -> ( (Int) -> Int ) {
+
+func outerFunc5() -> ( () -> Int ) {
   var num = 10
-  return  {(num2: Int)-> Int in
+  func innerFunc()-> Int {
     // num is captured
-    num += num2
+    num += 20
     return num
   }
+  return innerFunc
 }
 
-let outerFunc4Result = outerFunc4()
-outerFunc4Result(12)
+
 
 /*:
  ###### _Capture List_:
  - Notice that nested functions & closures capture value by reference.
  - This means that the values captured can be mutated (as long as they are vars), which might not be what you want (Question: do Objc blocks capture by reference or value?).
- - In Swift you can use something called a _capture list_ to "turn off capture by reference".
+ - In Swift you can use something called a _capture list_ to "turn off" capture by reference.
  */
 
 // Example illustrating capture by reference again.
@@ -473,7 +482,7 @@ close4()
  * Sometimes you may want a closure to retain self, such as when you are waiting for a network callback and you don't want self to be deallocated before the callback.
  */
 
-class TempNotifier {
+class TemperatureNotifier {
   
   var changeNotifier: ((Int) -> Void)?
   private var currentTemp = 72
@@ -494,31 +503,35 @@ class TempNotifier {
   }
 }
 
-let tempNotifier = TempNotifier()
+let tempNotifier = TemperatureNotifier()
 tempNotifier.someEvent()
 
 /*:
- * Difference between `[unowned self]` and `[weak self]` is that if unowned self is nil the app will crash. weak self gives you the chance of handling the case where self is possibly nil.
+ * Both `[unowned self]` and `[weak self]` do not increase the retain count.
+ * But if unowned self is nil the app will crash. 
+ * `weak self` gives you the chance of handling the case where self is possibly nil.
  */
 
 /*:
  ##### **Higher Order Functions**
- - Basically functions that take functions/closures and/or return them are called _Higher Order functions_. 
- - Higher order functions are functions that act on other functions.
+ - Basically functions that take functions/closures and/or return them are called _Higher Order functions_. We've already seen a bunch of custom examples of this.
+ - Higher order functions are functions that act on other functions, that is they are functions that consume other functions.
  - Swift has some important built in Higher Order functions, besides `sort(by:)`.
- - Let's look briefly at `map()`, `reduce()`, `filter()` (this is just an introduction).
+ - Let's look briefly at `map()`, `reduce()`, `filter()` (this is just an introduction). These are considered "functional" elements in Swift and you will find similar constructs in modern languages and languages that aren't really OO like JS.
  */
 
 /*:
  ##### `map()`
- - Takes a closure as a parameter
- - It simply calls the expression on each element and returns the resulting array
+ - Takes a closure as a parameter.
+ - It simply calls the expression on each element and returns the resulting array.
+ - Same as a for loop but some consider it more expressive.
  */
 
 let arr1 = [Int](1...10)
 let result2 = arr1.map({ (num:Int) -> String in
   return "\(num)"
 })
+
 print(#line, arr1)
 print(#line, result2)
 
@@ -526,8 +539,16 @@ print(#line, result2)
  Here's map using terser syntax:
  */
 
-let result22 = arr1.map{"\(he + 10)"}
+let result22 = arr1.map{"\($0 + 10)"}
 print(#line, result22)
+
+// using a range
+let result55 = (0...100).map{ $0 * 10 }
+result55
+
+// with stride
+let sum33 = stride(from: 10, to: 100, by: 2).map{ $0 * 100}
+sum33
 
 /*:
  ##### `reduce()`
@@ -546,10 +567,12 @@ print(#line, result7)
 let sum = arr1.reduce(0){ (num1: Int, num2: Int)-> Int in num1 + num2}
 print(#line, sum)
 
-//: Here's the same statement with default param names:
+//: Here's the same statement with default param names, starting at 10.
 
 let sum22 = arr1.reduce(10){ $0 + $1}
 print(#line, sum22)
+
+
 
 /*:
  ###### _`filter()`_
@@ -567,7 +590,8 @@ for item in arr1 {
 }
 print(#line, result4)
 
-// filter way without trailing closure syntax.
+//: filter way without trailing closure syntax and using named params.
+
 let result8 = arr1.filter({
   (num1:Int) -> Bool in
   return num1 % 3 == 0
@@ -578,6 +602,14 @@ print(#line, result8)
 
 let result9 = arr1.filter{$0 % 3 == 0}
 print(#line, result9)
+
+//: These expressions are also chainable!
+
+let crazyChain = (0...1000).filter{ $0 % 3 == 0 }.map{ $0 * 14 }.reduce(0){ $0 + $1 }
+
+crazyChain
+
+
 
 
 //: [Next](@next)
