@@ -364,7 +364,7 @@ let myCell: MyCell = MyCell()
 //: I can declare this case explicitly, but never do this.
 //: The upcast cannot fail and the super class of MyCell is known at compile time.
 
-vanillaCell = myCell as UITableViewCell
+//vanillaCell = myCell as UITableViewCell
 
 //: So, upcasting is free/implicit.
 

@@ -142,6 +142,8 @@ f1{
 /*:
  closure with a String parameter and no return value
  */
+
+
 let close2 = {
   // notice that the String type declaration can be inferred; so it is optional.
   (str) in
@@ -241,24 +243,24 @@ class MainVC2: UIViewController {
   }
   
   // func is called by DVC
-  func block(photo:Photo) {
-    self.photos.append(photo)
-  }
+  
   
   let dvc = DVC()
   
   func prepare() {
-    dvc.block = block(photo:)
+    dvc.block = {(photo:Photo) in
+      self.photos.append(photo)
+    }
   }
 }
 
 class DVC2: UIViewController {
   
-  var block:((Photo)->())!
+  //  var block:((Photo)->())!
   
-  func save() {
+  func save(block:(Photo)-> Void) {
     let photo = Photo()
-    self.block(photo)
+    block(photo)
   }
 }
 
@@ -410,6 +412,7 @@ func outerFunc2() -> ( () -> Int ) {
 }
 
 let theInnerFunc = outerFunc2() // returns the inner func
+
 print(#line, theInnerFunc())
 print(#line, theInnerFunc())
 
@@ -424,12 +427,11 @@ print(#line, theInnerFunc())
 
 func outerFunc3() -> ( () -> Int ) {
   var num = 10
-  func innerFunc()-> Int {
+  return {()-> Int  in
     // num is captured
     num += 20
     return num
   }
-  return innerFunc
 }
 
 
@@ -438,14 +440,12 @@ func outerFunc3() -> ( () -> Int ) {
  Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the 20, pass in a value as a parameter to the closure
  */
 
-func outerFunc5() -> ( () -> Int ) {
+func outerFunc5() -> ( (Int) -> Int ) {
   var num = 10
-  func innerFunc()-> Int {
-    // num is captured
-    num += 20
+  return { (increment: Int) -> Int in
+    num += increment
     return num
   }
-  return innerFunc
 }
 
 
@@ -508,7 +508,7 @@ tempNotifier.someEvent()
 
 /*:
  * Both `[unowned self]` and `[weak self]` do not increase the retain count.
- * But if unowned self is nil the app will crash. 
+ * But if unowned self is nil the app will crash.
  * `weak self` gives you the chance of handling the case where self is possibly nil.
  */
 
@@ -517,7 +517,8 @@ tempNotifier.someEvent()
  - Basically functions that take functions/closures and/or return them are called _Higher Order functions_. We've already seen a bunch of custom examples of this.
  - Higher order functions are functions that act on other functions, that is they are functions that consume other functions.
  - Swift has some important built in Higher Order functions, besides `sort(by:)`.
- - Let's look briefly at `map()`, `reduce()`, `filter()` (this is just an introduction). These are considered "functional" elements in Swift and you will find similar constructs in modern languages and languages that aren't really OO like JS.
+ - Let's look briefly at `map()`, `reduce()`, `filter()`, `flatMap()` (this is just an introduction). 
+ - These are considered "functional" elements in Swift and you will find similar constructs in other modern languages.
  */
 
 /*:
@@ -550,6 +551,7 @@ result55
 let sum33 = stride(from: 10, to: 100, by: 2).map{ $0 * 100}
 sum33
 
+
 /*:
  ##### `reduce()`
  Loops through all elements and "reduces" them to a single value.
@@ -557,6 +559,7 @@ sum33
 
 // long way
 var result7 = 0
+
 for item in arr1 {
   result7 += item
 }
@@ -566,6 +569,13 @@ print(#line, result7)
 
 let sum = arr1.reduce(0){ (num1: Int, num2: Int)-> Int in num1 + num2}
 print(#line, sum)
+
+let multipied = (1...10).reduce(1, *)
+multipied
+
+let letters = ["abc", "def", "ghi"]
+let combined = letters.reduce("", +)
+combined
 
 //: Here's the same statement with default param names, starting at 10.
 
@@ -603,6 +613,26 @@ print(#line, result8)
 let result9 = arr1.filter{$0 % 3 == 0}
 print(#line, result9)
 
+/*:
+ ##### `flatMap()`
+ Loops through all elements and "reduces" them to a single value.
+ */
+
+let notFlat1 = [[1,3,4],["yo","mo"],[2.0,66.9,100.8]]
+
+let flattened1 = notFlat1.flatMap{$0}
+flattened1
+
+let notFlat2:[Int?] = [nil,3,4,nil,6,8]
+let flattened2 = notFlat2.flatMap{ $0 }.map{ String($0) }
+flattened2
+
+// You can use flatMap to flatten out the results of a filter operation
+
+let notFlat3:[[Int]] = [[2,45,66,1],[5,7,9], [34,55]]
+let flattened3 = notFlat3.flatMap{ $0.filter{ $0 % 2 == 0  } }
+flattened3
+
 //: These expressions are also chainable!
 
 let crazyChain = (0...1000).filter{ $0 % 3 == 0 }.map{ $0 * 14 }.reduce(0){ $0 + $1 }
@@ -610,6 +640,55 @@ let crazyChain = (0...1000).filter{ $0 % 3 == 0 }.map{ $0 * 14 }.reduce(0){ $0 +
 crazyChain
 
 
+//: [Use Your Loaf](https://useyourloaf.com/blog/swift-guide-to-map-filter-reduce/)
+
+
+/*:
+ ##### Bonus, Make Custom Class Sortable
+ */
+
+class Person {
+  var age: Int
+  init(age: Int) {
+    self.age = age
+  }
+}
+
+extension Person: Comparable, CustomStringConvertible {
+  
+  static func <(lhs: Person, rhs: Person) -> Bool {
+    return lhs.age < rhs.age
+  }
+  
+  static func ==(lhs: Person, rhs: Person) -> Bool {
+    return lhs.age == rhs.age
+  }
+  
+  var description: String {
+    return "person age: \(age)"
+  }
+}
+
+let persons = [Person(age: 12), Person(age: 2), Person(age: 4)]
+let arr1Sorted = arr1.sorted()
+arr1Sorted
+
+let arraySlice = arr1[0..<3]
+
+let arraySlice2 = arr1[1..<5]
+
+let elements = [arraySlice, arraySlice2]
+let newArray = elements.flatMap{ $0 }
+
+for i in arraySlice {
+
+  print(#line, i)
+}
+
+let arr33 = Array(arraySlice)
+
+let personsSorted = persons.sorted()
+print(#line, personsSorted)
 
 
 //: [Next](@next)
