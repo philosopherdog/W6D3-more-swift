@@ -21,10 +21,11 @@ import PlaygroundSupport
 /*:
  ### What are Optionals?
  - Optionals are used in situations where a value may be absent.
- - Eg. a Person class may have a LibraryCard property. Since some people don't have library cards we should model this as an optional.
+ - Eg. a Person has a LibraryCard.
+ - Since not every person has a library card we should model this as an optional.
  - Optionals have 2 possibilities: 1) there is a value and you can unwrap it to access the value, or 2) there isn't a value, it is `nil`, and unwrapping crashes the app.
  - In Swift you can only assign `nil` to a value that is marked as being an optional type.
- - So, if I plan on setting a variable to `nil` at any point in its life then it must be wrapped as an optional type.
+ - So, if I plan on setting a variable to `nil` at any point in its life then it must be wrapped as an optional.
  - One place this comes up often is in VC's when you have a property that doesn't have a value at initialization time (outlets for instance).
  */
 
@@ -33,16 +34,21 @@ opt1 = nil
 
 // eg.
 class MyVC: UIViewController {
-  var someProperty: String?
+  var name: String?
 }
+
+let myVC = MyVC()
+myVC.name
 
 /*:
  ##### **Question:**
  * What are some of the differences between Swift's nil and Objc's nil?
  */
+
 /*:
  ##### **Basic Example:**
  */
+
 var numString = "45l"
 
 let result6 = Int(numString) // Int() Attempts to Convert a String to Int but it could fail
@@ -50,7 +56,7 @@ let result6 = Int(numString) // Int() Attempts to Convert a String to Int but it
 print(#line, result6 as Any)
 
 /*:
- - Notice we can't do addition with `result6` because it is not an Int value but a boxed optional value.
+ - Notice we can't do addition with `result6`. Why?
  */
 
 // let newResult6 = result6 + 10 // this throws an error
@@ -68,15 +74,14 @@ let myO1 = MyOptional<String>.none
 
 let myO2 = MyOptional<String>.some("Hello optional!")
 
-switch myO2 {
+switch myO1 {
 case .none:
   print(#line, "my nil")
 case .some(let message):
   print(#line, "\(message)")
 }
 
-
-switch myO1 {
+switch myO2 {
 case .none:
   print(#line, "my nil")
 case .some(let message):
@@ -87,16 +92,14 @@ case .some(let message):
  * 🤓 The idea of optionals is borrowed from Haskell.
  */
 
-
-
-
 /*:
  ##### Unwrapping
  - Think of optionals as boxed objects (remember how you have to unwrap NSNumber to do math with it. You must unbox optionals to do stuff with them just the same).
  - If you force unwrap an optional that is `nil` Swift will crash.
  - There are numerous ways to unwrap optionals in Swift and how you do this is important to readability and good coding style.
- - You want to avoid endless and unnecessary unwrapping code. Ugg.
+ - You want to avoid awkward and unnecessary unwrapping code. This can interfere with code readability.
  */
+
 /*:
  ** Unwrapping Techniques
  - Forced unwrapping.
@@ -112,19 +115,23 @@ case .some(let message):
  ##### **Forced UnWrap**
  - Everyone knows about forced unwrap.
  - Use it when you **absolutely** expect a value to be there and the app cannot continue without the value.
+ - Has the advantage of simplicity and readability.
+ - But it's the most dangerous.
  - Avoid using forced unwrap just because you don't understand what's happening.
- - Never force unwrap a value you didn't create, like data from a network request.
+ - Never force unwrap a value you didn't create, like data from a network request. Why?
  */
 
 //Eg. Forced Unwrap
 let nummy = Int("12")
 print(#line, nummy as Any) // notice this prints the int wrapped as an optional
-nummy! // This reasonable
+nummy! // Is this reasonable here or should I protect against this being nil?
 
 /*: -------------------- */
 /*:
  ##### **`nil` checking with forced unwrap**
- - Avoid doing this.
+ - Simple and pretty readable.
+ - Sometimes useful.
+ - But it requires the extra step of force unwrapping. Why is this a problem?
  */
 
 var dict1 = ["key1": 12]
@@ -132,7 +139,7 @@ var dict1 = ["key1": 12]
 // Note: Attempts to access a dictionary always return an optional
 let val1 = dict1["key1"]
 
-// never do this ☠️
+// prefer optional binding for examples of this kind.
 
 if val1 != nil {
   let result = val1! + 10 // we must unwrap it to do stuff
@@ -144,8 +151,9 @@ if val1 != nil {
  - `if let/var`
  - `guard let/var`
  - Use them when a `nil` value is possible and prefer them over forced unwrapping and nil checking.
- - Use `guard let` if you want an _early exit_ for `nil`.
- - You can't "fall through" with guard so sometimes you have to use if let/var instead if you need "fall through".
+ - Use `guard let` if you want an _early exit_ in the `nil`.
+ - You can't "fall through" with guard on the `nil` case.
+ - So sometimes you have to use if let/var instead if you need to "fall through" and continue to do stuff even if some value is `nil`.
  */
 
 
@@ -155,10 +163,10 @@ guard let sss = ss else {
   fatalError()
 }
 
-print(#line, sss) // we have access to sss unwrapped outside the check.
+print(#line, sss + 10) // we have access to sss unwrapped outside the check.
 
-if let ss = ss {
-  print(#line, ss)
+if var ss = ss {
+  print(#line, ss + 20)
 }
 
 
@@ -182,55 +190,31 @@ class LibraryCard {
 
 class Person {
   var libraryCard:LibraryCard?
-  init(libraryCard:LibraryCard?) {
+  init(libraryCard:LibraryCard? = nil) {
     self.libraryCard = libraryCard
   }
 }
 
-var personWithoutCard = Person(libraryCard: nil)
+var noCardPerson = Person()
 
-if let libCard = personWithoutCard.libraryCard {
+if let libCard = noCardPerson.libraryCard {
   print(#line, "has a library card!")
 } else {
   print(#line, "has no library card.") // this prints
 }
 
-let personWithCard = Person(libraryCard: LibraryCard(num: 1234))
+let cardPerson = Person(libraryCard: LibraryCard(num: 1234))
 
-if let libCard = personWithCard.libraryCard {
+if let libCard = cardPerson.libraryCard {
   print(#line, "person with card number ", libCard.number)
 }
 
-// chaining conditional binding expressions (prefer this)
+// chaining conditional binding expressions
 let newName = "fred"
 
-if let libCard = personWithoutCard.libraryCard, let myFavNum = Int("42"), newName == "fred", libCard.number == 1234 {
-  print(#line, libCard.number, myFavNum)
+if let libCard = noCardPerson.libraryCard, let myFavNum = Int("42"), newName == "fred", libCard.number == 1234 {
+  print(#line, "Why won't this print?")
 }
-
-/*:
- ######_Example 3_
- */
-
-func catGreeting(with catName: String?) -> String {
-  // nb. I'm making catName mutable, but remember it's a copy
-  guard var catName = catName else {
-    return "Cat name was nil!"
-  }
-  catName += " meow"
-  return catName
-}
-
-var catName: String?
-
-// catName is nil
-var greetingResult = catGreeting(with: catName)
-print(#line, greetingResult) // "Cat name was nil!"
-
-catName = "Tashi"
-greetingResult = catGreeting(with: catName)
-print(#line, greetingResult) // "Tashi meow"
-
 
 // chaining with guard
 
@@ -241,31 +225,61 @@ guard let num1 = Int("44"), var num2 = Int("99"), num1 == 44, num2 == 99 else {
 num1
 num2 += 1 // num2 is unwrapped
 
-//: 📝 If any of the expressions fail the whole thing does and the else condition runs
+//: 📝 If any of the expressions in the guard chain fail the whole thing does and the else condition runs. We can do the same this with if.
 
+if let num1 = Int("44"), var num2 = Int("99"), num1 == 44, num2 == 99 {
+  print(#line, "all this is true")
+}
 
 /*: -------------------- */
 /*:
  ##### _Defer:_
  * Provides a single way to execute some code whenever the function leaves the scope, no matter how it leaves the scope.
+ * You can't return anything from `defer`.
+ * Be careful with async and `defer` because the function might exit but be waiting for a callback.
  * A good real world example of this is executing a closure in a network completion handler that passes nil in if the request fails for some reason, otherwise it passes in the data.
  */
 
-func testDefer(with exit: Bool) {
-  defer {
-    print(#line, "runs whenever our function exits")
+enum NetworkError: Error, LocalizedError {
+  case bumURL
+  var errorDescription: String? {
+    switch self {
+    case .bumURL:
+      return NSLocalizedString("url is wrong", comment: "")
+    }
   }
-  guard exit == false else{
-    return
-  }
-  print(#line, "function got to the bottom")
 }
 
-var exit = false
-testDefer(with: exit)
-exit = true
-testDefer(with: exit)
+func fakeNetworkRequest(with url: URL, completion: (String?, Error?)-> Void ) {
+  
+  var result: String?
+  var error: Error?
+  
+  defer {
+    print(#line, "defer called")
+    completion(result, error)
+  }
+  
+  if url.absoluteString == "https://google.com" {
+    error = NetworkError.bumURL
+    return
+  }
+  
+  result = "Something went right!"
+}
 
+fakeNetworkRequest(with: URL(string: "https://google.com")!) { (str: String?, err: Error?) in
+  
+  if let err = err {
+    print(#line, err.localizedDescription)
+    return
+  }
+  
+  guard let str = str else {
+    return
+  }
+  print(#line, str)
+}
 
 /*: -------------------- */
 /*:
@@ -278,7 +292,7 @@ testDefer(with: exit)
  ###### _Example 1:_
  */
 
-var age2: Int? // optionals default to nil
+var age2: Int?
 let unwrappedAge = age2 ?? 12 // 12
 
 /*:
@@ -287,22 +301,23 @@ let unwrappedAge = age2 ?? 12 // 12
 
 var name: String?
 
-//: Nil Coalescing Replaces 2 more verbose techniques
-//: First Long way using nil checking.
+//: Nil Coalescing is a convenience that replaces longer structures
 
 var result1b: String = ""
 
-if name == nil {
-  result1b = "Fat Freddy"
+if let name = name {
+  result1b = name
 } else {
-  result1b = name!
+  result1b = "Fat Freddy"
 }
 
-//: Using the ternary operator
-let result1 = name == nil ? "Fat Freddy": name!
+result1b
+
+//: Or using the ternary operator
+let result1 = name != nil ? name! : "Fat Freddy"
 
 //: Here it is using `nil coalescing` (🍭)
-//: Notice how `nil coalescing` does an implicit nil check.
+//: Notice how `nil coalescing` does an implicit nil check and returns the unwrapped value if it's not nil.
 
 let result7 = name ?? "Slim Freddy"
 
@@ -345,10 +360,11 @@ class Dummy {
 let d = Dummy()
 d.implicitlyUnwrappedImage = UIImage(named: "swift.png")
 d.implicitlyUnwrappedImage
+d.implicitlyUnwrappedImage = nil
 
 /*: -------------------- */
 /*:
- ##### **Optional Casting**
+ ##### **Optionals & Casting**
  * Notice: Upcasting is _implicit_!
  */
 
@@ -360,15 +376,16 @@ class MyCell: UITableViewCell {}
 
 let myCell: MyCell = MyCell()
 
+vanillaCell = myCell
+
 //: I'm upcasting from MyCell to UITableViewCell it's super class.
 //: I can declare this case explicitly, but never do this.
 //: The upcast cannot fail and the super class of MyCell is known at compile time.
 
 //vanillaCell = myCell as UITableViewCell
 
-//: So, upcasting is free/implicit.
-
-vanillaCell = myCell
+//: So, upcasting is free/implicit and can't fail.
+//: Optionals aren't relevant to upcasting for this reason.
 
 /*: -------------------- */
 /*:
@@ -386,18 +403,22 @@ class Dog: Mammal {}
 //: Notice person is upcast to an AnyObject when I initialize it.
 let person3: AnyObject = Person3()
 
+//: We know Person is a Mammal though.
 if person3 is Mammal {
   print(#line, "Person is a mammal")
 }
 
 /*:
  * Because Person3 was upcast to an AnyObject the compiler cannot infer its underlying type until it is used at runtime.
- * If we try to _downcast_ person3 to it's underlying type `Person3` we can't just use _as_ since this cast _could fail_.
+ * If we try to _downcast_ person3 to it's underlying type `Person3` we can't just use _as_ since this cast _could fail_ if we made a mistake.
  * We must indicate that this cast could fail using either the "?" called an "optional downcast" or "!" which is an "forced downcast".
  * Like forced unwrapping Swift will crash if you attempt to force downcast to the wrong type.
  * If you do an optional cast then you must still unwrap the result.
  * Never assume that your downcast will work unless you wrote the code. Handle failed downcasts gracefully.
  */
+
+
+// ❓Why does this not print?
 
 if let optionalDownCastP3 = person3 as? Person3, let name = optionalDownCastP3.name {
   print(#line, name)
@@ -412,8 +433,8 @@ let forcedDownCastP3 = person3 as! Mammal
  * Should we use optional or forced downcast on our person3 instance?
  */
 
-let p4 = person3 as? Dog
-p4 // nil because p4 is _not_ of type Dog!
+let p4 = person3 as? Dog // Optional Dog
+p4 // nil because persons are not Dogs!
 
 // if we forced downcast this would crash
 // let p44 = person3 as! Dog
@@ -427,24 +448,24 @@ p4 // nil because p4 is _not_ of type Dog!
  */
 
 class Person4 {
-  private let name: String
-  init?(name: String) {
-    guard name != "fred" else {
+  private(set) var name: String
+  init?(json: Dictionary<String,Any>) {
+    guard let name = json["name"] as? String else {
       return nil
     }
     self.name = name
   }
 }
 
-let p10 = Person4(name: "fred") // nil
-let p111 = Person4(name: "jane")
-
+let p10 = Person4(json: ["name":"fred"]) // works
+let p1111 = Person4(json: ["name": true]) // nil
+let p111 = Person4(json: ["age": 12]) // nil
 
 /*: -------------------- */
 /*:
  #### **Optional Chaining**
- - Is Shorthand for unwrapping optionals.
- - It overloads the `?`, which makes it a bit confusing.
+ - Is a shorthand for unwrapping optionals.
+ - It overloads the `?`, which makes it a bit confusing. `?` is ordinarily used to wrap a value!
  - The whole expression evalutes to an optional. So, you still have to unwrap the whole expression.
  - It allows a nested optional expression to fail anywhere along the unwrapping.
  - If it does fail to have a value anywhere along the expression the whole expression evaluates to an optional containing nil.
@@ -463,14 +484,14 @@ class LibraryCard2 {
 class Citizen {
   // not every citize has a libraryCard
   private(set) internal var libraryCard: LibraryCard2?
-  init(libraryCard: LibraryCard2?) {
+  init(libraryCard: LibraryCard2? = nil) {
     self.libraryCard = libraryCard
   }
 }
 
 
 
-let citizen = Citizen(libraryCard: nil)
+let citizen = Citizen() // no lib card
 
 /*:
  * We wanted to access the `borrowCount` of the LibraryCard.
@@ -513,11 +534,13 @@ badddCast
 
 //: 📝 The `?` when added after an init means: "the returned object could be nil so wrap the return in an optional".
 
-class MyObj {
-  init?() {}
+class BummerObject {
+  init?(){
+    return nil
+  }
 }
 
-let myObj = MyObj()
+let myObj = BummerObject()
 
 /*:
  * 📝 But the `?` when added after a property means something completely different.
@@ -545,7 +568,8 @@ if var number = number {
 // Example from UIKit
 
 var cell: MyCell? = MyCell()
-var text = cell?.textLabel?.text
+var text = cell?.textLabel?.text // text is also an optional
+
 text = "something special" // notice we don't need to unwrap it to assign
 text
 
@@ -590,12 +614,9 @@ if (citizen.libraryCard?.borrowCount = 10) == nil {
   print(#line, "assignment failed")
 }
 
-
-
-
-
-
-
+if let assignment = UITableViewCell().textLabel?.text = "some assignment" {
+  print(#line, "the assignment succeeded \(assignment)")
+}
 
 
 

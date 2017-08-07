@@ -10,7 +10,8 @@ PlaygroundPage.current.needsIndefiniteExecution = true
  - "Closures are self-contained blocks of functionality that can be passed around and used in your code"
  - By this definition ordinary functions in Swift are closures too!
  - Closures/Functions can also capture value from outside their scope (More on this below)
- - Closures/Functions are known as _first class citizens_. What does this mean?
+ - Closures/Functions are known as _first class citizens_. 
+ - How does this compare with Objc?
  */
 
 /*:
@@ -18,13 +19,13 @@ PlaygroundPage.current.needsIndefiniteExecution = true
  */
 
 func innerFunc() {
-  print(#line, "Function passed to another function executed")
+  print(#line, "Function passed to another function was executed")
 }
 
 let function = innerFunc // assigning a function to a let/var (notice the "()" brackets are ommitted because we are not executing it.)
 
 func function1(f:(Void)-> Void) {
-  print(#line, #function, " is executing")
+  print(#line, #function, "is executing")
   f()
 }
 
@@ -46,7 +47,7 @@ function1(f: innerFunc)
 typealias SimpleFuncType = ()->()
 
 func function2(f: SimpleFuncType) {
-  print(#line, #function, " is executing")
+  print(#line, #function, "is executing")
   f()
 }
 
@@ -80,7 +81,7 @@ makeFullName(firstName, lastName)
  obj.doStuff(with: stuff, and: otherStuff)
  */
 
-// Notice how splitting the name imposes a naming convention on the consumer!
+// Notice how splitting the name suggests a naming convention on the consumer
 
 func insertObject(at indexPath: NSIndexPath) {
   print(#line, indexPath)
@@ -92,9 +93,11 @@ insertObject(at: indexPath)
 
 /*:
  ##### **Unnamed Functions AKA CLOSURES**
- Closures are just like functions except they are *unnamed*!
+ Closures are just like functions except they are *unnamed*.
  */
-/*: World's simplest Swift closure! Takes no paramaters and returns nothing. */
+
+/*: World's simplest Swift closure! Takes no paramaters and returns nothing. 
+*/
 
 _ = {
   print(#line, #function, " the world's simplest closure")
@@ -133,8 +136,9 @@ f1(with:{
 })
 
 /*:
- Calling with trailing closure syntax (this is logically identical to the above call)
+ * Calling with trailing closure syntax (this is logically identical to the above call).
  */
+
 f1{
   print(#line, "In line closure executed")
 }
@@ -146,12 +150,14 @@ f1{
 
 let close2 = {
   // notice that the String type declaration can be inferred; so it is optional.
-  (str) in
+  str in
   print(#line, str)
 }
+
 /*:
  calling & passing in data:
  */
+
 close2("How to call a closure with a string argument")
 
 /*:
@@ -162,32 +168,27 @@ close2("How to call a closure with a string argument")
  Closure with 2 parameters and a return. Here I'm calling it inline.
  */
 
-let someNum = 10
-let someOtherNum = 12
-
-let r11 = {
-  (num1: Int, num2: Int) -> Int in
-  return num1 * num2
-}(someNum, someOtherNum)
-
-// r11 captures the result which is automatically called.
-
-print(#line, r11)
+let someNum = 10.0
+let someOtherNum = 12.0
 
 let r134 = {
-  (num1: Int, num2: Int) -> Int in
-  return num1 * num2
+  (num1: Double, num2: Double) -> Double in
+  return num1 / num2
 }
 
-// r134 captures
-let result = r134(12, 10)
+let result = r134(someNum, someOtherNum)
 
+let r11 = {
+  (num1: Double, num2: Double) -> Double in
+  return num1 * num2
+}(someNum, someOtherNum)
 
 /*:
  ##### Using Functions in CallBacks
  - Plain functions (or closures) can be passed to another object to be used as a callback or completion handler.
+ - This allows us to callback after an async call has completed without tight coupling (similar to delegation).
  - Apple uses this in all modern parts of the SDK as an alternative or adjunct to delegation!
- - Can you pass a function to a method in Objc?
+ - This was first added to Objc in 2.0.
  */
 
 class Photo {}
@@ -201,12 +202,12 @@ class MainVC: UIViewController {
     }
   }
   
-  // func is called by DVC
-  func block(photo:Photo) {
+  // func is called by DVC in callback
+  func block(photo: Photo) {
     self.photos.append(photo)
   }
   
-  let dvc = DVC()
+  lazy var dvc: DVC = DVC()
   
   func prepare() {
     dvc.block = block(photo:)
@@ -231,6 +232,7 @@ mainVC.dvc.save()
 /*:
  ##### _Do:_
  * Re-write the above and instead of creating a separate function create a closure.
+* Also pass the block straight into the save method instead of saving it as a property.
  */
 
 class MainVC2: UIViewController {
@@ -242,35 +244,26 @@ class MainVC2: UIViewController {
     }
   }
   
-  // func is called by DVC
-  
+  func block(photo: Photo) {
+    self.photos.append(photo)
+  }
   
   let dvc = DVC()
   
   func prepare() {
-    dvc.block = {(photo:Photo) in
-      self.photos.append(photo)
-    }
+    dvc.block = block(photo:)
   }
 }
 
 class DVC2: UIViewController {
   
-  //  var block:((Photo)->())!
+  var block:((Photo)->())!
   
-  func save(block:(Photo)-> Void) {
+  func save() {
     let photo = Photo()
     block(photo)
   }
 }
-
-/*:
- ##### _Do:_
- * Refactor the same method and pass the block straight into the save method instead of saving it as a property.
- */
-
-
-
 
 // Adding Closures to an array
 
@@ -349,7 +342,9 @@ foods2.sort{$0 > $1}
 foods2
 
 /*:
- Swift's String type actually defines the `>` and `<` as a function that takes 2 strings and returns a Bool depending on their order. So we can even omit the generated shorthand arguments!
+ Swift's actually defines a generic function for the > and < that can take in 2 params and return a Bool
+ public func ><T>(lhs: T, rhs: T) -> Bool where T : Comparable
+ So, we can do sort like this!
  */
 
 foods2.sort(by:>)
@@ -395,7 +390,7 @@ func outerFunc() {
   print(#line, "after", num)
 }
 
-outerFunc() // Can someone walk us through this code?
+outerFunc()
 
 /*:
  Instead of executing the inner function internally, let's return it so we can execute the returned function.
@@ -427,11 +422,11 @@ print(#line, theInnerFunc())
 
 func outerFunc3() -> ( () -> Int ) {
   var num = 10
-  return {()-> Int  in
-    // num is captured
+  func innerFunc()-> Int {
     num += 20
     return num
   }
+  return innerFunc
 }
 
 
@@ -440,19 +435,20 @@ func outerFunc3() -> ( () -> Int ) {
  Rewrite the last function using a closure, call it outerFunc4() and instead of hard coding the 20, pass in a value as a parameter to the closure
  */
 
-func outerFunc5() -> ( (Int) -> Int ) {
+func outerFunc4() -> ( () -> Int ) {
   var num = 10
-  return { (increment: Int) -> Int in
-    num += increment
+  func innerFunc()-> Int {
+    num += 20
     return num
   }
+  return innerFunc
 }
 
 
 
 /*:
  ###### _Capture List_:
- - Notice that nested functions & closures capture value by reference.
+ - Nested functions & closures capture value by reference.
  - This means that the values captured can be mutated (as long as they are vars), which might not be what you want (Question: do Objc blocks capture by reference or value?).
  - In Swift you can use something called a _capture list_ to "turn off" capture by reference.
  */
@@ -461,30 +457,37 @@ func outerFunc5() -> ( (Int) -> Int ) {
 // Make sure you totally understand what's going on here.
 
 var z = 10
+
 let close5 = {
   print(#line, "~~~>", z)
 }
+
 z += 20
+
+print(#line)
 close5()
 
 var y = 10
+
 let close4 = {
   [y] in
   print(#line, "==>", y)
 }
+
 y += 20
 
+print(#line)
 close4()
 
 /*: Capturing self and retain cycles.
  * If an object owns a closure, and that closure owns self, then we have a retain cycle.
- * This is why the compiler forces you to explicitly refer to self inside a closure.
+ * This is why the compiler forces you to explicitly refer to self inside a closure as well as add @escaping.
  * Sometimes you may want a closure to retain self, such as when you are waiting for a network callback and you don't want self to be deallocated before the callback.
  */
 
 class TemperatureNotifier {
   
-  var changeNotifier: ((Int) -> Void)?
+  var changeNotifier: ((Int) -> Void)!
   private var currentTemp = 72
   
   init() {
@@ -498,7 +501,7 @@ class TemperatureNotifier {
   }
   
   func someEvent() {
-    changeNotifier!(59)
+    changeNotifier(59)
     print(#line, currentTemp)
   }
 }
@@ -507,9 +510,9 @@ let tempNotifier = TemperatureNotifier()
 tempNotifier.someEvent()
 
 /*:
- * Both `[unowned self]` and `[weak self]` do not increase the retain count.
- * But if unowned self is nil the app will crash.
- * `weak self` gives you the chance of handling the case where self is possibly nil.
+ * Both `[unowned self]` and `[weak self]` do not increase the retain count of self.
+ * But if `unowned self` is `nil` and we execute a block that refers to self the app will crash. Think of `unowned self` like an implicitly unwrapped optional.
+ * `weak self` gives you the chance of handling the case where self is possibly `nil`. That is, `self` is an optional.
  */
 
 /*:
@@ -518,7 +521,7 @@ tempNotifier.someEvent()
  - Higher order functions are functions that act on other functions, that is they are functions that consume other functions.
  - Swift has some important built in Higher Order functions, besides `sort(by:)`.
  - Let's look briefly at `map()`, `reduce()`, `filter()`, `flatMap()` (this is just an introduction). 
- - These are considered "functional" elements in Swift and you will find similar constructs in other modern languages.
+ - These are considered "functional" elements in Swift and you will find similar constructs in other modern languages. Under the hood they are just loops that written generically.
  */
 
 /*:
