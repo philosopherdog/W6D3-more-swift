@@ -8,5 +8,6 @@
         <page name='ErrorHandling'/>
         <page name='Tuples'/>
         <page name='Enum'/>
+        <page name='ARCObjects'/>
     </pages>
 </playground>

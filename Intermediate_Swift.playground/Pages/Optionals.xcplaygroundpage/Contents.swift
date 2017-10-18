@@ -165,7 +165,7 @@ guard let sss = ss else {
 
 print(#line, sss + 10) // we have access to sss unwrapped outside the check.
 
-if var ss = ss {
+if let ss = ss {
   print(#line, ss + 20)
 }
 
