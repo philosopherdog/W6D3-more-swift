@@ -94,7 +94,7 @@ case .some(let message):
 
 /*:
  ##### Unwrapping
- - Think of optionals as boxed objects (remember how you have to unwrap NSNumber to do math with it. You must unbox optionals to do stuff with them just the same).
+ - Think of optionals as boxed objects (analogous to NSNumber in Objc).
  - If you force unwrap an optional that is `nil` Swift will crash.
  - There are numerous ways to unwrap optionals in Swift and how you do this is important to readability and good coding style.
  - You want to avoid awkward and unnecessary unwrapping code. This can interfere with code readability.
@@ -113,8 +113,7 @@ case .some(let message):
 /*: -------------------- */
 /*:
  ##### **Forced UnWrap**
- - Everyone knows about forced unwrap.
- - Use it when you **absolutely** expect a value to be there and the app cannot continue without the value.
+ - Use forced unwrap when you **absolutely** expect a value to be there and the app cannot continue without the value.
  - Has the advantage of simplicity and readability.
  - But it's the most dangerous.
  - Avoid using forced unwrap just because you don't understand what's happening.
@@ -139,7 +138,7 @@ var dict1 = ["key1": 12]
 // Note: Attempts to access a dictionary always return an optional
 let val1 = dict1["key1"]
 
-// prefer optional binding for examples of this kind.
+// prefer optional binding for examples of this kind. Why?
 
 if val1 != nil {
   let result = val1! + 10 // we must unwrap it to do stuff
@@ -148,25 +147,24 @@ if val1 != nil {
 
 /*:
  ##### **Optional Binding (prefer this 😀 to nil checking and forced unwrap) **
- - `if let/var`
- - `guard let/var`
+ - `if let/var` and `guard let/var`
  - Use them when a `nil` value is possible and prefer them over forced unwrapping and nil checking.
  - Use `guard let` if you want an _early exit_ in the `nil`.
  - You can't "fall through" with guard on the `nil` case.
- - So sometimes you have to use if let/var instead if you need to "fall through" and continue to do stuff even if some value is `nil`.
+ - So sometimes you have to use `if let/var` instead if you need to "fall through" and continue to do stuff even if some value is `nil`.
  */
 
 
 let ss = Int("10")
 
 guard let sss = ss else {
-  fatalError()
+  fatalError() // we must exit in the else case
 }
 
 print(#line, sss + 10) // we have access to sss unwrapped outside the check.
 
 if let ss = ss {
-  print(#line, ss + 20)
+  print(#line, ss + 20) // ss is unwrapped inside the block
 }
 
 
@@ -182,15 +180,15 @@ if let ss = ss {
  */
 
 class LibraryCard {
-  let number:Int
-  init(num:Int) {
+  let number: Int
+  init(num: Int) {
     self.number = num
   }
 }
 
 class Person {
-  var libraryCard:LibraryCard?
-  init(libraryCard:LibraryCard? = nil) {
+  var libraryCard: LibraryCard?
+  init(libraryCard: LibraryCard? = nil) {
     self.libraryCard = libraryCard
   }
 }
@@ -198,9 +196,9 @@ class Person {
 var noCardPerson = Person()
 
 if let libCard = noCardPerson.libraryCard {
-  print(#line, "has a library card!")
+  print(#line, libCard.number, "this doesn't fire")
 } else {
-  print(#line, "has no library card.") // this prints
+  print(#line, "has no library card.") // this prints, but why can't we access libCard?
 }
 
 let cardPerson = Person(libraryCard: LibraryCard(num: 1234))
@@ -212,14 +210,14 @@ if let libCard = cardPerson.libraryCard {
 // chaining conditional binding expressions
 let newName = "fred"
 
-if let libCard = noCardPerson.libraryCard, let myFavNum = Int("42"), newName == "fred", libCard.number == 1234 {
+if let libCard = noCardPerson.libraryCard, let myFavNum = Int("42"), myFavNum == 42, newName == "fred", libCard.number == 1234 {
   print(#line, "Why won't this print?")
 }
 
 // chaining with guard
 
 guard let num1 = Int("44"), var num2 = Int("99"), num1 == 44, num2 == 99 else {
-  fatalError()
+  fatalError() // why does execution never reach here?
 }
 
 num1
@@ -227,7 +225,7 @@ num2 += 1 // num2 is unwrapped
 
 //: 📝 If any of the expressions in the guard chain fail the whole thing does and the else condition runs. We can do the same this with if.
 
-if let num1 = Int("44"), var num2 = Int("99"), num1 == 44, num2 == 99 {
+if let num1 = Int("44"), let num2 = Int("99"), num1 == 44, num2 == 99 {
   print(#line, "all this is true")
 }
 
@@ -303,6 +301,8 @@ var name: String?
 
 //: Nil Coalescing is a convenience that replaces longer structures
 
+//: Long way!
+
 var result1b: String = ""
 
 if let name = name {
@@ -313,7 +313,8 @@ if let name = name {
 
 result1b
 
-//: Or using the ternary operator
+//: Shorter using the ternary operator
+
 let result1 = name != nil ? name! : "Fat Freddy"
 
 //: Here it is using `nil coalescing` (🍭)
@@ -360,7 +361,7 @@ class Dummy {
 let d = Dummy()
 d.implicitlyUnwrappedImage = UIImage(named: "swift.png")
 d.implicitlyUnwrappedImage
-d.implicitlyUnwrappedImage = nil
+d.implicitlyUnwrappedImage = nil // most likely they will never be set to nil once set
 
 /*: -------------------- */
 /*:
@@ -378,11 +379,14 @@ let myCell: MyCell = MyCell()
 
 vanillaCell = myCell
 
-//: I'm upcasting from MyCell to UITableViewCell it's super class.
-//: I can declare this case explicitly, but never do this.
+//: I'm upcasting from MyCell to UITableViewCell MyCell's superclass.
+//: I could declare this upcast explicitly (never do this).
+
+vanillaCell = myCell as UITableViewCell
+
 //: The upcast cannot fail and the super class of MyCell is known at compile time.
 
-//vanillaCell = myCell as UITableViewCell
+
 
 //: So, upcasting is free/implicit and can't fail.
 //: Optionals aren't relevant to upcasting for this reason.
@@ -390,6 +394,7 @@ vanillaCell = myCell
 /*: -------------------- */
 /*:
  #### _DownCasting:_
+ - Optionals are relevant to downcasting. Why?
  */
 
 class Mammal {}
@@ -400,8 +405,9 @@ class Person3: Mammal {
 
 class Dog: Mammal {}
 
-//: Notice person is upcast to an AnyObject when I initialize it.
-let person3: AnyObject = Person3()
+//: Notice person is upcast to an Any when I initialize it.
+
+let person3: Any = Person3()
 
 //: We know Person is a Mammal though.
 if person3 is Mammal {
@@ -409,12 +415,12 @@ if person3 is Mammal {
 }
 
 /*:
- * Because Person3 was upcast to an AnyObject the compiler cannot infer its underlying type until it is used at runtime.
+ * Because Person3 was upcast to an Any the compiler cannot infer its underlying type until it is used at runtime.
  * If we try to _downcast_ person3 to it's underlying type `Person3` we can't just use _as_ since this cast _could fail_ if we made a mistake.
- * We must indicate that this cast could fail using either the "?" called an "optional downcast" or "!" which is an "forced downcast".
- * Like forced unwrapping Swift will crash if you attempt to force downcast to the wrong type.
- * If you do an optional cast then you must still unwrap the result.
- * Never assume that your downcast will work unless you wrote the code. Handle failed downcasts gracefully.
+ * We must indicate that this cast could fail using either the "?" called an "optional downcast" or "!" called a "forced downcast".
+ * Like unwrapping an optional will crash Swift, force casting to the wrong type will crash the program.
+ * If you do an optional cast then you must still (safely) unwrap the result.
+ * Never assume that your downcast will work unless you wrote the code. Handle failed downcasts gracefully in production apps.
  */
 
 
@@ -444,12 +450,12 @@ p4 // nil because persons are not Dogs!
 /*:
  ##### **Failable Initializer**
  * A possible use for this might be a model object that could handle parsing a small chunk of JSON and fail to initialize if the JSON is malformed.
- * Many framework initializers are failable in iOS.
+ * Many framework initializers are failable in iOS. (Objc by default has initializers that are failable).
  */
 
 class Person4 {
   private(set) var name: String
-  init?(json: Dictionary<String,Any>) {
+  init?(json: Dictionary<String, Any>) {
     guard let name = json["name"] as? String else {
       return nil
     }
@@ -457,7 +463,7 @@ class Person4 {
   }
 }
 
-let p10 = Person4(json: ["name":"fred"]) // works
+let p10 = Person4(json: ["name": "fred"]) // works
 let p1111 = Person4(json: ["name": true]) // nil
 let p111 = Person4(json: ["age": 12]) // nil
 

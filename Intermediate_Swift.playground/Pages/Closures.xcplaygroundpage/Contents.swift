@@ -24,15 +24,10 @@ func innerFunc() {
 
 let function = innerFunc // assigning a function to a let/var (notice the "()" brackets are ommitted because we are not executing it.)
 
-func function1(f:(Void)-> Void) {
+func function1(f:()-> ()) {
   print(#line, #function, "is executing")
   f()
 }
-
-// Alernative syntax. We can omit the word Void if we wish.
-func myFunctionAlt1(f:()->()) {}
-func myFunctionAlt2(f:(Void)->()){}
-func myFunctionAlt3(f:()->(Void)){}
 
 // Calling myFunction with a function passed in. Notice no () because we're not executing it.
 
@@ -51,7 +46,7 @@ func function2(f: SimpleFuncType) {
   f()
 }
 
-function2(f:function)
+function2(f: function)
 
 /*:
  ##### Function Internal/External Parameters
@@ -105,7 +100,7 @@ _ = {
 
 
 // Assigning a simple closure to a constant
-let close1:(Void)->(Void) = { print(#line, "hello closure!") }
+let close1:()->() = { print(#line, "hello closure!") }
 
 /*
  Compared to objc

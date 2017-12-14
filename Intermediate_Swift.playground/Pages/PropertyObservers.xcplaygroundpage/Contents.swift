@@ -88,7 +88,7 @@ class LibraryCard:CustomStringConvertible {
 
 var cards: [LibraryCard] = []
 
-for i in 1...4 {
+for _ in 1...4 {
     let card = LibraryCard()
     card.number = Int(arc4random_uniform(1000+1)) // 1-1000 inclusive
     cards.append(card)
